@@ -46,10 +46,10 @@ export default function AdminClients() {
   }, []);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-semibold mb-6">All Clients</h1>
+    <div className="p-4 md:mt-12 mt-8 bg-background">
+      <h1 className="text-2xl text-foreground font-semibold mb-6">All Clients</h1>
 
-      <Card className="p-4">
+      <Card className="p-4 text-foreground">
         {loading ? (
           <p>Loading clients...</p>
         ) : clients.length === 0 ? (

@@ -59,9 +59,9 @@ export default function AddClient() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-semibold mb-6">Add New Client</h1>
-      <Card className="max-w-xl">
+    <div className="p-4 md:mt-12 mt-8 bg-background">
+      <h1 className="text-2xl text-foreground font-semibold mb-6">Add New Client</h1>
+      <Card className="max-w-xl text-foreground">
         <CardHeader>
           <CardTitle>Add Client Details</CardTitle>
         </CardHeader>

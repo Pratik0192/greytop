@@ -36,7 +36,7 @@ export default function AdminSidebar() {
   }
 
   return ( 
-    <aside className="h-screen w-64 bg-white shadow-md border-r p-4 flex flex-col justify-between">
+    <aside className="hidden md:flex h-screen w-64 bg-background text-foreground p-4 flex-col justify-between">
       <div>
         <div className="text-2xl font-semibold text-center mb-6">Greytop</div>
         <nav className="space-y-2 ">
@@ -45,8 +45,8 @@ export default function AdminSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex justify-center items-center px-4 py-2 rounded-md text-gray-700 hover:bg-gray-300",
-                pathname === item.href && "bg-gray-300 font-medium"
+                "flex justify-center items-center px-4 py-2 rounded-md",
+                pathname === item.href && "bg-background font-medium"
               )}
             >
               {item.name}

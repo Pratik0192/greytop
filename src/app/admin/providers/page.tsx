@@ -2,7 +2,7 @@
 
 export default function AdminProviders() {
   return (
-    <div>
+    <div className="bg-background text-foreground mt-12" >
       all available providers
     </div>
   )
