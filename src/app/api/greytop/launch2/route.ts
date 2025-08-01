@@ -19,7 +19,7 @@ export const POST = async (req: NextRequest) => {
       member_account,
       game_uid,
       credit_amount,
-      currency_code = 'USD',
+      currency_code = 'INR',
       language = 'en',
       home_url,
       platform = 1,
@@ -28,10 +28,7 @@ export const POST = async (req: NextRequest) => {
 
     if (!member_account || credit_amount === undefined || !currency_code || !transfer_id) {
       return NextResponse.json(
-        {
-          error:
-            'member_account, credit_amount, currency_code, and transfer_id are required.',
-        },
+        { error: 'member_account, credit_amount, currency_code, and transfer_id are required.', },
         { status: 400 }
       );
     }
