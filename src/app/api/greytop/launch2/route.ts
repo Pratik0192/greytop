@@ -1,35 +1,37 @@
-// seamless
+//transfer
 
-import { NextRequest, NextResponse } from 'next/server';
-import { encryptAES } from '@/lib/aes';
-import { verifyClient } from '@/lib/verifyClient';
+import { NextRequest, NextResponse } from "next/server";
+import { encryptAES } from "@/lib/aes";
+import { verifyClient } from "@/lib/verifyClient";
 
 const SERVER_URL = process.env.SERVER_URL!;
 const AGENCY_UID = process.env.AGENCY_UID!;
 const PLAYER_PREFIX = process.env.PLAYER_PREFIX!; 
 
 export const POST = async (req: NextRequest) => {
-
   const auth = await verifyClient(req);
   if(!auth.success) {
     return NextResponse.json({ error: auth.message }, { status: auth.status });
   }
 
   try {
-    const { 
+    const {
       member_account,
       game_uid,
       credit_amount,
-      currency_code = 'INR',
+      currency_code = 'USD',
       language = 'en',
       home_url,
       platform = 1,
-      callback_url = '',
+      transfer_id,
     } = await req.json();
 
-    if (!member_account || !game_uid || !credit_amount) {
+    if (!member_account || credit_amount === undefined || !currency_code || !transfer_id) {
       return NextResponse.json(
-        { error: 'member_account, game_uid, and credit_amount are required.' },
+        {
+          error:
+            'member_account, credit_amount, currency_code, and transfer_id are required.',
+        },
         { status: 400 }
       );
     }
@@ -46,13 +48,13 @@ export const POST = async (req: NextRequest) => {
       language,
       home_url,
       platform,
-      callback_url,
+      transfer_id
     }
 
     const payloadString = JSON.stringify(payloadObject);
     const encryptedPayload = encryptAES(payloadString);
 
-    const upstreamResponse = await fetch(`${SERVER_URL}/game/v1`, {
+    const upstreamResponse = await fetch(`${SERVER_URL}/game/v2`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,19 +63,23 @@ export const POST = async (req: NextRequest) => {
         agency_uid: AGENCY_UID,
         timestamp,
         payload: encryptedPayload,
-      })
-    })
+      }),
+    });
 
     const responseData = await upstreamResponse.json();
 
     return NextResponse.json({
       status: upstreamResponse.status,
-      data: responseData
-    })
+      data: responseData,
+    });
+
   } catch (error) {
-    console.error('Error in /api/Launch:', error);
+    console.error("Error in /api/greytop/launch2:", error);
     return NextResponse.json(
-      { error: 'Internal server error', details: (error as any).message },
+      {
+        error: "Internal server error",
+        details: (error as any).message,
+      },
       { status: 500 }
     );
   }
