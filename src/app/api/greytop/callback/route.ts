@@ -1,6 +1,5 @@
 import { encryptAES } from "@/lib/aes";
 import { NextRequest, NextResponse } from "next/server";
-import { CALLBACK_URL } from "../Launch/route";
 import { prisma } from "@/lib/prisma";
 
 const PLAYER_PREFIX = process.env.PLAYER_PREFIX!; 

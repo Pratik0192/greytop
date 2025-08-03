@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 const SERVER_URL = process.env.SERVER_URL!;
 const AGENCY_UID = process.env.AGENCY_UID!;
 const PLAYER_PREFIX = process.env.PLAYER_PREFIX!; 
-export const CALLBACK_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/greytop/callback`
+const CALLBACK_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/greytop/callback`
 
 export const POST = async (req: NextRequest) => {
 
