@@ -43,6 +43,20 @@ model Game {
   createdAt             DateTime    @default(now())
 }
 
+model GameLaunchLog {
+  id             Int      @id @default(autoincrement())
+  memberAccount  String
+  gameUid        String
+  creditAmount   String
+  currencyCode   String
+  language       String
+  homeUrl        String
+  platform       Int
+  callbackUrl    String
+  timestamp      BigInt
+  createdAt      DateTime @default(now())
+}
+
 enum Role {
   ADMIN
   CLIENT

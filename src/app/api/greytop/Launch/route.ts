@@ -3,10 +3,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { encryptAES } from '@/lib/aes';
 import { verifyClient } from '@/lib/verifyClient';
+import { prisma } from '@/lib/prisma';
 
 const SERVER_URL = process.env.SERVER_URL!;
 const AGENCY_UID = process.env.AGENCY_UID!;
 const PLAYER_PREFIX = process.env.PLAYER_PREFIX!; 
+export const CALLBACK_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/greytop/callback`
 
 export const POST = async (req: NextRequest) => {
 
@@ -36,6 +38,20 @@ export const POST = async (req: NextRequest) => {
 
     const timestamp = Date.now().toString();
 
+    await prisma.gameLaunchLog.create({
+      data: {
+        memberAccount: `${PLAYER_PREFIX}${member_account}`,
+        gameUid: game_uid,
+        creditAmount: credit_amount,
+        currencyCode: currency_code,
+        language: language,
+        homeUrl: home_url,
+        platform: platform,
+        callbackUrl: callback_url,
+        timestamp: BigInt(timestamp)
+      }
+    })
+
     const payloadObject = {
       agency_uid: AGENCY_UID,
       member_account: `${PLAYER_PREFIX}${member_account}`,
@@ -46,7 +62,7 @@ export const POST = async (req: NextRequest) => {
       language,
       home_url,
       platform,
-      callback_url,
+      callback_url: CALLBACK_URL,
     }
 
     const payloadString = JSON.stringify(payloadObject);
