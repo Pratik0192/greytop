@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
+import { User } from "@/generated/prisma";
 
-export async function verifyClient(req: NextRequest) {
+type VerifyClientSuccess = { success: true; client: User };
+type VerifyClientFailure = { success: false; status: number; message: string };
+
+export async function verifyClient(req: NextRequest): Promise<VerifyClientSuccess | VerifyClientFailure> {
   const apiKey = req.headers.get("x-api-key");
 
   if(!apiKey) {

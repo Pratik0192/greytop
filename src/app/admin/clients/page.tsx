@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import api from "@/lib/axios";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -58,6 +59,7 @@ export default function AdminClients() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Id</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>API Key</TableHead>
@@ -70,6 +72,14 @@ export default function AdminClients() {
             <TableBody>
               {clients.map((client) => (
                 <TableRow key={client.id}>
+                  <TableCell>
+                    <Link
+                      href={`/admin/clients/members?userId=${client.id}`}
+                      className="hover:underline"
+                    >
+                      {client.id}
+                    </Link>
+                  </TableCell>
                   <TableCell>{client.name}</TableCell>
                   <TableCell>{client.email}</TableCell>
                   <TableCell className="max-w-[150px]">

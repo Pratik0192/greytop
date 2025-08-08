@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -24,6 +18,40 @@ model User {
   status                Status      @default(active)
   whitelistedIps        String[]
   createdAt             DateTime    @default(now())
+
+  clientMembers ClientMember[]
+}
+
+model ClientMember {
+  id            Int      @id @default(autoincrement())
+  userId        String
+  memberAccount String
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameSessions  GameSession[]
+
+  @@unique([userId, memberAccount])
+  @@index([userId])
+}
+
+model GameSession {
+  id            Int           @id @default(autoincrement())
+  clientMemberId Int
+  gameUid       String
+  creditAmount  String
+  currencyCode  String
+  language      String
+  homeUrl       String
+  platform      Int
+  callbackUrl   String
+  timestamp     BigInt
+  createdAt     DateTime      @default(now())
+
+  clientMember ClientMember   @relation(fields: [clientMemberId], references: [id], onDelete: Cascade)
+
+  @@index([clientMemberId])
+  @@index([gameUid])
 }
 
 model GamePlatform {
@@ -41,20 +69,6 @@ model Game {
   platform              GamePlatform @relation(fields: [platformId], references: [id])
   platformId            String
   createdAt             DateTime    @default(now())
-}
-
-model GameLaunchLog {
-  id             Int      @id @default(autoincrement())
-  memberAccount  String
-  gameUid        String
-  creditAmount   String
-  currencyCode   String
-  language       String
-  homeUrl        String
-  platform       Int
-  callbackUrl    String
-  timestamp      BigInt
-  createdAt      DateTime @default(now())
 }
 
 enum Role {

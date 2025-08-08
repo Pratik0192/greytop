@@ -17,6 +17,7 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json({ error: auth.message }, { status: auth.status });
   }
 
+  const client = auth.client;
   try {
     const { 
       member_account,
@@ -36,11 +37,28 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
+    const fullMemberAccount = `${PLAYER_PREFIX}${member_account}`;
     const timestamp = Date.now().toString();
 
-    await prisma.gameLaunchLog.create({
+    let clientMember = await prisma.clientMember.findFirst({
+      where: {
+        userId: client.id,
+        memberAccount: fullMemberAccount,
+      }
+    })
+
+    if (!clientMember) {
+      clientMember = await prisma.clientMember.create({
+        data: {
+          userId: client.id,
+          memberAccount: fullMemberAccount,
+        },
+      });
+    }
+
+    await prisma.gameSession.create({
       data: {
-        memberAccount: `${PLAYER_PREFIX}${member_account}`,
+        clientMemberId: clientMember.id,
         gameUid: game_uid,
         creditAmount: credit_amount,
         currencyCode: currency_code,
@@ -48,13 +66,13 @@ export const POST = async (req: NextRequest) => {
         homeUrl: home_url,
         platform: platform,
         callbackUrl: callback_url,
-        timestamp: BigInt(timestamp)
+        timestamp: BigInt(timestamp),
       }
     })
 
     const payloadObject = {
       agency_uid: AGENCY_UID,
-      member_account: `${PLAYER_PREFIX}${member_account}`,
+      member_account: fullMemberAccount,
       game_uid,
       timestamp,
       credit_amount,
