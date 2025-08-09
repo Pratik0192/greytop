@@ -1,94 +1,41 @@
-import { encryptAES } from "@/lib/aes";
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-
-const PLAYER_PREFIX = process.env.PLAYER_PREFIX!; 
+import { decryptAES } from "@/lib/aes";
 
 export const POST = async (req: NextRequest) => {
+  console.log("callback called");
+  
   try {
     const body = await req.json();
-    console.log("[CALLBACK] Incoming request body:", body);
 
     const {
-      serial_number,
-      currency_code = 'INR',
-      game_uid,
-      member_account,
-      win_amount,
-      bet_amount,
-      data,
+      timestamp,
+      payload
     } = body;
 
-    if(!serial_number || !currency_code || !game_uid || !member_account || !win_amount || !bet_amount || !data) {
-      console.warn("[CALLBACK] Missing required fields");
-      return NextResponse.json({ code: 1, msg: "Missing required fields" });
+    if(!payload) {
+      return NextResponse.json(
+        { error: "Missing payload" },
+        { status: 400 }
+      );
     }
 
-    const timestamp = Date.now().toString();
+    const decryptedText = decryptAES(payload);
 
-    const payloadObject = {
-      serial_number,
-      currency_code,
-      game_uid,
-      member_account: `${PLAYER_PREFIX}${member_account}`,
-      win_amount,
-      bet_amount,
-      timestamp,
-      data
+    let decryptedJson;
+    try {
+      decryptedJson = JSON.parse(decryptedText);
+    } catch (error) {
+      console.error("[CALLBACK] Failed to parse decrypted payload:", decryptedText);
+      return NextResponse.json(
+        { error: "Invalid decrypted payload format" },
+        { status: 400 }
+      );
     }
 
-    console.log("[CALLBACK] Prepared payload to forward:", payloadObject);
+    console.log("[CALLBACK] Timestamp:", timestamp);
+    console.log("[CALLBACK] Decrypted payload:", decryptedJson);
 
-    const downstream = await prisma.gameLaunchLog.findFirst({
-      where: { memberAccount: member_account }
-    })
-
-    if (!downstream) {
-      console.log("[CALLBACK] No downstream entry found for:", member_account);
-      return NextResponse.json({ code: 1, msg: "Client callback URL not found" });
-    }
-
-    const downstreamCallbackUrl = downstream?.callbackUrl;
-
-    if (!downstreamCallbackUrl) {
-      console.log("[CALLBACK] Callback URL missing in DB for:", member_account);
-      return NextResponse.json({ code: 1, msg: "Client callback URL not found" });
-    }
-
-    console.log("[CALLBACK] Forwarding to client callback URL:", downstreamCallbackUrl);
-
-    const payloadString = JSON.stringify(payloadObject);
-    const encryptedPayload = encryptAES(payloadString);
-
-    const clientResponse = await fetch(downstreamCallbackUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        timestamp,
-        payload: encryptedPayload,
-      })
-    })
-
-    console.log("[CALLBACK] Client responded with status:", clientResponse.status);
-
-    const clientData = await clientResponse.json();
-
-    console.log("[CALLBACK] Response from client:", clientData);
-
-    const {
-      code = 1,
-      msg = "Unknown error",
-      payload: clientPayload
-    } = clientData
-
-    return NextResponse.json({
-      code,
-      msg,
-      payload: clientPayload ?? ""
-    })
-    
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[CALLBACK] Error:", error);
     return NextResponse.json(
