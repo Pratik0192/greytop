@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import api from "@/lib/axios";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Games {
@@ -14,6 +14,14 @@ interface Games {
 }
 
 export default function AdminClients() {
+  return (
+    <Suspense fallback={<p>Loading search params...</p>}>
+      <AdminClientsContent />
+    </Suspense>
+  );
+}
+
+function AdminClientsContent()  {
 
   const searchParams = useSearchParams();
   const clientMemberId = searchParams.get("clientMemberId");
