@@ -21,7 +21,7 @@ export const POST = async(req: NextRequest) => {
       );
     }
 
-    const gameuids = await prisma.gameSession.findMany({
+    const gameSessions = await prisma.gameSession.findMany({
       where: {
         clientMemberId,
       },
@@ -30,7 +30,12 @@ export const POST = async(req: NextRequest) => {
       }
     })
 
-    return NextResponse.json({ gameuids });
+    const serializedSessions = gameSessions.map(session => ({
+      ...session,
+      timestamp: session.timestamp.toString()
+    }));
+
+    return NextResponse.json({ success: true, gameSessions: serializedSessions });
   } catch (error) {
     console.error("Error fetching game uids:", error);
     return NextResponse.json(

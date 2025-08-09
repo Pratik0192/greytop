@@ -28,15 +28,13 @@ export default function AdminClients() {
     const fetchGameUids = async () => {
       try {
         const gamesRes = await api.post("/api/admin/user/get-game-uids", { clientMemberId });
-        console.log("clientMemberId sent:", clientMemberId);
-        console.log("games API response:", gamesRes.data);
-        setGames(gamesRes.data.gameuids || []);
+        setGames(gamesRes.data.gameSessions || []);
 
-        try {
-          const memberRes = await api.post("/api/admin/user/get-member-by-id", { clientMemberId });
-          setMemberName(memberRes.data?.member?.memberAccount || "");
-        } catch (error) {
-          toast.error("Failed to load member info");
+        const memberRes = await api.post("/api/admin/user/get-member-by-id", { clientMemberId });
+        if(memberRes.data.success && memberRes.data.member) {
+          setMemberName(memberRes.data.member.memberAccount);
+        } else {
+          setMemberName("Unknown Member");
         }
       } catch (error) {
         console.error(error);
@@ -52,7 +50,7 @@ export default function AdminClients() {
   return (
     <div className="p-4 md:mt-12 mt-8 bg-background">
       <h1 className="text-2xl font-semibold mb-6 text-foreground">
-        Members for Client: {memberName || clientMemberId}
+        {loading ? "Loading..." : `Games for Member: ${memberName}`}
       </h1>
 
       <Card className="p-4 text-foreground">
