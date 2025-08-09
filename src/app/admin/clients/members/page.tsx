@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import api from "@/lib/axios";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Member {
@@ -16,6 +16,14 @@ interface Member {
 }
 
 export default function MemberAccounts() {
+  return (
+    <Suspense fallback={<p>Loading search params...</p>}>
+      <MemberAccountsContent />
+    </Suspense>
+  );
+}
+
+function MemberAccountsContent() {
 
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId");
