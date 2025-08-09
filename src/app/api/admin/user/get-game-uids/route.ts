@@ -28,7 +28,7 @@ export const POST = async(req: NextRequest) => {
       orderBy: {
         createdAt: "desc"
       }
-    })
+    });
 
     const serializedSessions = gameSessions.map(session => ({
       ...session,
