@@ -25,6 +25,9 @@ export const POST = async (req: NextRequest) => {
       where: {
         clientMemberId,
       },
+      include: {
+        gameHistory: true,
+      },
       orderBy: {
         createdAt: "desc"
       }
@@ -32,7 +35,12 @@ export const POST = async (req: NextRequest) => {
 
     const serializedSessions = gameSessions.map(session => ({
       ...session,
-      timestamp: session.timestamp.toString()
+      timestamp: session.timestamp.toString(),
+      gameHistory: session.gameHistory.map(history => ({
+        ...history,
+        betAmount: history.betAmount.toString(),
+        winAmount: history.winAmount.toString(),
+      }))
     }));
 
     return NextResponse.json({ success: true, gameSessions: serializedSessions });

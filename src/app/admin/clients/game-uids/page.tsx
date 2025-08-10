@@ -55,6 +55,9 @@ function AdminClientsContent()  {
     fetchGameUids();
   }, [clientMemberId]);
 
+  console.log(games);
+  
+
   return (
     <div className="p-4 md:mt-12 mt-8 bg-background">
       <h1 className="text-2xl font-semibold mb-6 text-foreground">
