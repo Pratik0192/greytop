@@ -54,6 +54,19 @@ model GameSession {
   @@index([gameUid])
 }
 
+model GameHistory {
+  id             Int      @id @default(autoincrement())
+  serialNumber   String   @unique
+  gameUid        String
+  gameRound      String
+  betAmount      Decimal  @db.Decimal(18, 2)
+  winAmount      Decimal  @db.Decimal(18, 2)
+  memberAccount  String
+  currencyCode   String
+  callbackTime   DateTime
+  createdAt      DateTime @default(now())
+}
+
 model GamePlatform {
   id                    String      @id @default(uuid())
   name                  String

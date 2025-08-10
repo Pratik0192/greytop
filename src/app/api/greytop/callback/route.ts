@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decryptAES } from "@/lib/aes";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma";
 
 export const POST = async (req: NextRequest) => {
   console.log("callback called");
@@ -34,6 +36,32 @@ export const POST = async (req: NextRequest) => {
 
     console.log("[CALLBACK] Timestamp:", timestamp);
     console.log("[CALLBACK] Decrypted payload:", decryptedJson);
+
+    const {
+      serial_number,
+      game_uid,
+      game_round,
+      bet_amount,
+      win_amount,
+      member_account,
+      currency_code,
+      timestamp: gameTimestamp,
+    } = decryptedJson;
+
+    await prisma.gameHistory.upsert({
+      where: { serialNumber: serial_number },
+      update: {},
+      create: {
+        serialNumber: serial_number,
+        gameUid: game_uid,
+        gameRound: game_round,
+        betAmount: new Prisma.Decimal(bet_amount),
+        winAmount: new Prisma.Decimal(win_amount),
+        memberAccount: member_account,
+        currencyCode: currency_code,
+        callbackTime: new Date(`${gameTimestamp} UTC`),
+      },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
