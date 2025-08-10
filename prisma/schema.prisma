@@ -49,6 +49,7 @@ model GameSession {
   createdAt     DateTime      @default(now())
 
   clientMember ClientMember   @relation(fields: [clientMemberId], references: [id], onDelete: Cascade)
+  gameHistory  GameHistory[]
 
   @@index([clientMemberId])
   @@index([gameUid])
@@ -65,6 +66,12 @@ model GameHistory {
   currencyCode   String
   callbackTime   DateTime
   createdAt      DateTime @default(now())
+
+  gameSessionId  Int?
+  gameSession    GameSession? @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+
+  @@index([gameUid])
+  @@index([memberAccount])
 }
 
 model GamePlatform {

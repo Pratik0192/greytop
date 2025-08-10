@@ -48,6 +48,20 @@ export const POST = async (req: NextRequest) => {
       timestamp: gameTimestamp,
     } = decryptedJson;
 
+    const matchingSession = await prisma.gameSession.findFirst({
+      where: {
+        gameUid: game_uid,
+        clientMember: {
+          memberAccount: member_account
+        }
+      },
+      select: { id: true }
+    })
+
+    if (!matchingSession) {
+      console.warn(`[CALLBACK] No matching GameSession found for gameUid=${game_uid}, memberAccount=${member_account}`);
+    }
+
     await prisma.gameHistory.upsert({
       where: { serialNumber: serial_number },
       update: {},
@@ -60,6 +74,7 @@ export const POST = async (req: NextRequest) => {
         memberAccount: member_account,
         currencyCode: currency_code,
         callbackTime: new Date(`${gameTimestamp} UTC`),
+        gameSessionId: matchingSession?.id || null
       },
     });
 
