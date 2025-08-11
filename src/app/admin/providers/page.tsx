@@ -1,45 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import api from "@/lib/axios";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import AddGamesDialog from "@/components/AddGamesDialog";
-import { Card } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-interface Game {
-  gameName: string;
-  uid: string;
-  type: string;
-}
-
-interface Platform {
+interface Provider {
   id: string;
   name: string;
-  games: Game[];
+  ggrPercent: number;
+  createdAt: string;
 }
 
-export default function AdminProviders() {
-  const [providers, setProviders] = useState<Platform[]>([]);
-  const [newProvider, setNewProvider] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<Platform | null>(null);
+export default function Providers() {
+  const [name, setName] = useState("");
+  const [ggrPercent, setGgrPercent] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [loadingProviders, setLoadingProviders] = useState(true);
 
   const fetchProviders = async () => {
+    setLoadingProviders(true);
     try {
-      const res = await api.get("/api/admin/getgames");
-      setProviders(res.data);
-    } catch {
-      toast.error("Failed to fetch providers");
+      const res = await api.post("/api/admin/get-providers");
+      if (res.data.success) {
+        setProviders(res.data.providers);
+      } else {
+        toast.error(res.data.message || "Failed to fetch providers");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Error fetching providers");
+    } finally {
+      setLoadingProviders(false);
     }
   };
 
@@ -47,115 +43,111 @@ export default function AdminProviders() {
     fetchProviders();
   }, []);
 
-  const handleAddProvider = async () => {
-    if (!newProvider.trim()) {
-      toast.error("Provider name cannot be empty");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim() || !ggrPercent.trim()) {
+      toast.error("Please fill in all fields");
       return;
     }
 
+    setLoading(true);
     try {
-      await api.post("/api/greytop/addgames", [
-        { platform: newProvider.trim(), games: [] },
-      ]);
-      toast.success("Provider added successfully!");
-      setNewProvider("");
-      fetchProviders();
-    } catch {
-      toast.error("Failed to add provider");
+      const res = await api.post("/api/admin/add-provider", {
+        name,
+        ggrPercent: parseFloat(ggrPercent),
+      });
+
+      if (res.data.success) {
+        toast.success(`Provider "${res.data.provider.name}" added!`);
+        setName("");
+        setGgrPercent("");
+      } else {
+        toast.error(res.data.message || "Failed to add provider");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 mt-10">
-      <h1 className="text-2xl font-bold mb-4 text-foreground">Add Providers</h1>
+    <div className="p-6 max-w-5xl mx-auto mt-20 space-y-8">
+      {/* Add Provider Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Add Game Provider
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+              <Label htmlFor="name">Provider Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter provider name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
 
-      {/* Add Provider Input */}
-      <div className="flex gap-3 mb-6">
-        <Input
-          placeholder="Provider Name"
-          value={newProvider}
-          onChange={(e) => setNewProvider(e.target.value)}
-        />
-        <Button onClick={handleAddProvider}>+ Add Provider</Button>
-      </div>
+            <div>
+              <Label htmlFor="ggr">GGR Percent</Label>
+              <Input
+                id="ggr"
+                type="number"
+                step="0.01"
+                placeholder="e.g. 12.5"
+                value={ggrPercent}
+                onChange={(e) => setGgrPercent(e.target.value)}
+              />
+            </div>
+
+            <Button type="submit" disabled={loading} className="w-full md:w-auto">
+              {loading ? "Adding..." : "Add Provider"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Providers Table */}
-      <h2 className="text-xl font-semibold mb-3">Providers</h2>
-      <Card className="p-4 text-foreground">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Provider Name</TableHead>
-            <TableHead>Total Games</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {providers.map((prov) => (
-            <TableRow key={prov.id}>
-              <TableCell>{prov.name}</TableCell>
-              <TableCell>{prov.games.length - 1}</TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedProvider(prov);
-                    setDialogOpen(true);
-                  }}
-                >
-                  + Add Games
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      </Card>
-
-      {/* Games Table */}
-      <h2 className="text-xl font-semibold my-5">Games</h2>
-      <Card className="p-4 text-foreground">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Provider</TableHead>
-            <TableHead>Game Name</TableHead>
-            <TableHead>UID</TableHead>
-            <TableHead>Type</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {providers.flatMap((prov) =>
-            prov.games
-              .filter(
-                (game) =>
-                  game.gameName.trim() !== "" &&
-                  game.uid.trim() !== "" &&
-                  game.type.trim() !== ""
-              )
-              .map((game, idx) => (
-                <TableRow key={prov.id + idx}>
-                  <TableCell>{prov.name}</TableCell>
-                  <TableCell>{game.gameName}</TableCell>
-                  <TableCell>{game.uid}</TableCell>
-                  <TableCell>{game.type}</TableCell>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Existing Providers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingProviders ? (
+            <p>Loading providers...</p>
+          ) : providers.length === 0 ? (
+            <p>No providers found.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>GGR %</TableHead>
+                  <TableHead>Created At</TableHead>
                 </TableRow>
-              ))
+              </TableHeader>
+              <TableBody>
+                {providers.map((provider) => (
+                  <TableRow key={provider.id}>
+                    <TableCell>{provider.id}</TableCell>
+                    <TableCell>{provider.name}</TableCell>
+                    <TableCell>{provider.ggrPercent}</TableCell>
+                    <TableCell>
+                      {new Date(provider.createdAt).toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </TableBody>
-      </Table>
+        </CardContent>
       </Card>
-
-
-      {/* Add Games Dialog */}
-      {selectedProvider && (
-        <AddGamesDialog
-          open={dialogOpen}
-          setOpen={setDialogOpen}
-          provider={selectedProvider}
-          onSuccess={fetchProviders}
-        />
-      )}
     </div>
-  );
+  )
 }

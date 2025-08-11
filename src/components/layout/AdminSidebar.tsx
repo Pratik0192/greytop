@@ -16,7 +16,8 @@ export default function AdminSidebar() {
     { name: "Dashboard", href: "/admin" },
     { name: "Add new Client", href: "/admin/add-client" },
     { name: "All Clients", href: "/admin/clients" },
-    { name: "Providers available", href: "/admin/providers" },
+    { name: "Providers", href: "/admin/providers" },
+    { name: "Games", href: "/admin/games" },
   ];
 
   const handleLogout = async() => {

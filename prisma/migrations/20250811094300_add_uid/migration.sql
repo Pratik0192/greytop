@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Game" ADD COLUMN     "gameUid" TEXT NOT NULL DEFAULT 'UNKNOWN_UID';

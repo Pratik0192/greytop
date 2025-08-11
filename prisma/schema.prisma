@@ -9,15 +9,15 @@ datasource db {
 }
 
 model User {
-  id                    String      @id @default(uuid())
-  password              String      
-  name                  String
-  email                 String      @unique
-  role                  Role        @default(CLIENT)
-  apiKey                String      @unique
-  status                Status      @default(active)
-  whitelistedIps        String[]
-  createdAt             DateTime    @default(now())
+  id             String   @id @default(uuid())
+  password       String
+  name           String
+  email          String   @unique
+  role           Role     @default(CLIENT)
+  apiKey         String   @unique
+  status         Status   @default(active)
+  whitelistedIps String[]
+  createdAt      DateTime @default(now())
 
   clientMembers ClientMember[]
 }
@@ -28,27 +28,27 @@ model ClientMember {
   memberAccount String
   createdAt     DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  gameSessions  GameSession[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameSessions GameSession[]
 
   @@unique([userId, memberAccount])
   @@index([userId])
 }
 
 model GameSession {
-  id            Int           @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   clientMemberId Int
-  gameUid       String
-  creditAmount  String
-  currencyCode  String
-  language      String
-  homeUrl       String
-  platform      Int
-  callbackUrl   String
-  timestamp     BigInt
-  createdAt     DateTime      @default(now())
+  gameUid        String
+  creditAmount   String
+  currencyCode   String
+  language       String
+  homeUrl        String
+  platform       Int
+  callbackUrl    String
+  timestamp      BigInt
+  createdAt      DateTime @default(now())
 
-  clientMember ClientMember   @relation(fields: [clientMemberId], references: [id], onDelete: Cascade)
+  clientMember ClientMember  @relation(fields: [clientMemberId], references: [id], onDelete: Cascade)
   gameHistory  GameHistory[]
 
   @@index([clientMemberId])
@@ -56,39 +56,39 @@ model GameSession {
 }
 
 model GameHistory {
-  id             Int      @id @default(autoincrement())
-  serialNumber   String   @unique
-  gameUid        String
-  gameRound      String
-  betAmount      Decimal  @db.Decimal(18, 2)
-  winAmount      Decimal  @db.Decimal(18, 2)
-  memberAccount  String
-  currencyCode   String
-  callbackTime   DateTime
-  createdAt      DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  serialNumber  String   @unique
+  gameUid       String   @default("UNKNOWN_UID")
+  gameRound     String   @default("ROUND_0")
+  betAmount     Decimal  @default(0.00) @db.Decimal(18, 2)
+  winAmount     Decimal  @default(0.00) @db.Decimal(18, 2)
+  memberAccount String
+  currencyCode  String
+  callbackTime  DateTime
+  createdAt     DateTime @default(now())
 
-  gameSessionId  Int?
-  gameSession    GameSession? @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  gameSessionId Int?
+  gameSession   GameSession? @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
 
   @@index([gameUid])
   @@index([memberAccount])
 }
 
-model GamePlatform {
-  id                    String      @id @default(uuid())
-  name                  String
-  games                 Game[]
-  createdAt             DateTime    @default(now())
+model GameProvider {
+  id         String   @id @db.Char(3)
+  name       String   @unique
+  ggrPercent Int      @default(0)
+  createdAt  DateTime @default(now())
+  games      Game[]
 }
 
 model Game {
-  id                    String      @id @default(uuid())
-  gameName              String
-  uid                   String      @unique
-  type                  String
-  platform              GamePlatform @relation(fields: [platformId], references: [id])
-  platformId            String
-  createdAt             DateTime    @default(now())
+  id             String       @id @db.Char(3)
+  name           String       @default("Unnamed Game")
+  gameUid        String       @default("UNKNOWN_UID")
+  types          String       @default("Unknown")
+  gameProvider   GameProvider @relation(fields: [gameProviderId], references: [id])
+  gameProviderId String       @default("DEF") @db.Char(3)
 }
 
 enum Role {
