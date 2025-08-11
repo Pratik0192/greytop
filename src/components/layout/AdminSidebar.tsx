@@ -36,7 +36,7 @@ export default function AdminSidebar() {
   }
 
   return ( 
-    <aside className="hidden md:flex h-screen w-64 bg-background text-foreground p-4 flex-col justify-between">
+    <aside className="hidden md:flex h-screen w-64 bg-customGreen text-foreground p-4 flex-col justify-between">
       <div>
         <div className="text-2xl font-semibold text-center mb-6">Greytop</div>
         <nav className="space-y-2 ">
