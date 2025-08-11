@@ -9,15 +9,16 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(uuid())
-  password       String
-  name           String
-  email          String   @unique
-  role           Role     @default(CLIENT)
-  apiKey         String   @unique
-  status         Status   @default(active)
-  whitelistedIps String[]
-  createdAt      DateTime @default(now())
+  id               String   @id @default(uuid())
+  password         String
+  name             String
+  email            String   @unique
+  role             Role     @default(CLIENT)
+  apiKey           String   @unique
+  status           Status   @default(active)
+  providersAllowed String[]
+  whitelistedIps   String[]
+  createdAt        DateTime @default(now())
 
   clientMembers ClientMember[]
 }
@@ -46,6 +47,7 @@ model GameSession {
   platform       Int
   callbackUrl    String
   timestamp      BigInt
+  providerCode   String  @default("UNKNOWN_CODE")
   createdAt      DateTime @default(now())
 
   clientMember ClientMember  @relation(fields: [clientMemberId], references: [id], onDelete: Cascade)

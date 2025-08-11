@@ -19,8 +19,8 @@ interface GameHistory {
   id: number;
   serialNumber: string;
   gameRound: string;
-  betAmount: string; // or number if you convert it
-  winAmount: string; // or number if you convert it
+  betAmount: string;
+  winAmount: string;
   callbackTime: string;
   createdAt: string;
   gameSessionId: number;
@@ -33,6 +33,7 @@ interface Games {
   id: number;
   gameUid: string;
   createdAt: string;
+  providerCode: string;
   gameHistory: GameHistory[];
 }
 
@@ -99,6 +100,7 @@ function AdminClientsContent() {
             <TableHeader>
               <TableRow>
                 <TableHead>Game Uids</TableHead>
+                <TableHead>Provider Code</TableHead>
                 <TableHead>Session Created At</TableHead>
                 <TableHead>Serial Number</TableHead>
                 <TableHead>Game Round</TableHead>
@@ -118,6 +120,9 @@ function AdminClientsContent() {
                             {game.gameUid}
                           </TableCell>
                           <TableCell rowSpan={game.gameHistory.length}>
+                            {game.providerCode}
+                          </TableCell>
+                          <TableCell rowSpan={game.gameHistory.length}>
                             {new Date(game.createdAt).toLocaleString()}
                           </TableCell>
                         </>
@@ -134,6 +139,7 @@ function AdminClientsContent() {
                 ) : (
                   <TableRow key={game.id}>
                     <TableCell>{game.gameUid}</TableCell>
+                    <TableCell>{game.providerCode}</TableCell>
                     <TableCell>
                       {new Date(game.createdAt).toLocaleString()}
                     </TableCell>

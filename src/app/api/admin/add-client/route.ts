@@ -9,10 +9,14 @@ function generateApiKey(): string {
 
 export const POST = async (req: NextRequest) => {
   try {
-    const { name, email, whitelistedIps, password } = await req.json();
+    const { name, email, whitelistedIps, password, providersAllowed } = await req.json();
 
     if (!name || !email || !Array.isArray(whitelistedIps)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    if (!Array.isArray(providersAllowed) || !providersAllowed.every(p => typeof p === "string")) {
+      return NextResponse.json({ error: "providersAllowed must be an array of strings" }, { status: 400 });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -21,7 +25,6 @@ export const POST = async (req: NextRequest) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const apiKey = generateApiKey();
 
     const user = await prisma.user.create({
@@ -31,6 +34,7 @@ export const POST = async (req: NextRequest) => {
         password: hashedPassword,
         apiKey,
         whitelistedIps,
+        providersAllowed,
         role: 'CLIENT',
         status: 'active'
       }
@@ -45,6 +49,7 @@ export const POST = async (req: NextRequest) => {
         apiKey: user.apiKey,
         role: user.role,
         whitelistedIps: user.whitelistedIps,
+        providersAllowed: user.providersAllowed,
       },
     });
   } catch (error) {

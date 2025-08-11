@@ -15,6 +15,7 @@ export const POST = async(req: NextRequest) => {
         apiKey: true,
         status: true,
         whitelistedIps: true,
+        providersAllowed: true,
         createdAt: true
       }
     })

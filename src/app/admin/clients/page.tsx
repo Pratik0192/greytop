@@ -23,6 +23,7 @@ interface Client {
   apiKey: string;
   status: string;
   whitelistedIps: string[];
+  providersAllowed: string[];
   createdAt: string;
 }
 
@@ -46,6 +47,9 @@ export default function AdminClients() {
     fetchClients();
   }, []);
 
+  console.log(clients);
+  
+
   return (
     <div className="p-4 md:mt-12 mt-8 bg-background">
       <h1 className="text-2xl text-foreground font-semibold mb-6">All Clients</h1>
@@ -64,6 +68,7 @@ export default function AdminClients() {
                 <TableHead>Email</TableHead>
                 <TableHead>API Key</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Allowed Providers</TableHead>
                 <TableHead>Whitelisted IPs</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -111,6 +116,9 @@ export default function AdminClients() {
                   </TableCell>
 
                   <TableCell>{client.status}</TableCell>
+                  <TableCell className="truncate max-w-[150px]">
+                    {client.providersAllowed.join(", ")}
+                  </TableCell>
                   <TableCell className="truncate max-w-[150px]">
                     {client.whitelistedIps.join(", ")}
                   </TableCell>

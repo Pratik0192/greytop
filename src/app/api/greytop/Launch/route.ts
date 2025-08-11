@@ -23,6 +23,7 @@ export const POST = async (req: NextRequest) => {
       member_account,
       game_uid,
       credit_amount,
+      providerCode,
       currency_code = 'INR',
       language = 'en',
       home_url,
@@ -34,6 +35,20 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json(
         { error: 'member_account, game_uid, and credit_amount are required.' },
         { status: 400 }
+      );
+    }
+
+    if (!providerCode) {
+      return NextResponse.json(
+        { error: 'providerCode is required.' },
+        { status: 400 }
+      );
+    }
+
+    if(!client.providersAllowed.includes(providerCode)) {
+      return NextResponse.json(
+        { error: `Provider ${providerCode} is not allowed for this client.` },
+        { status: 403 }
       );
     }
 
@@ -66,6 +81,7 @@ export const POST = async (req: NextRequest) => {
         homeUrl: home_url,
         platform: platform,
         callbackUrl: callback_url,
+        providerCode: providerCode,
         timestamp: BigInt(timestamp),
       }
     })

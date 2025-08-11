@@ -16,8 +16,13 @@ export default function AddClient() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [ipInput, setIpInput] = useState("");
   const [whitelistedIps, setWhitelistedIps] = useState<string[]>([]);
+
+  const [providerInput, setProviderInput] = useState("");
+  const [providersAllowed, setProvidersAllowed] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -34,6 +39,18 @@ export default function AddClient() {
     setWhitelistedIps(whitelistedIps.filter(item => item !== ip));
   };
 
+  const handleAddProvider = () => {
+    const trimmed = providerInput.trim();
+    if (trimmed && !providersAllowed.includes(trimmed)) {
+      setProvidersAllowed([...providersAllowed, trimmed]);
+      setProviderInput("");
+    }
+  };
+
+  const handleRemoveProvider = (id: string) => {
+    setProvidersAllowed(providersAllowed.filter(item => item !== id));
+  };
+
   const handleAddClient = async() => {
     if( !name || !email || !password ) {
       toast.error("Please fill all required fields");
@@ -46,7 +63,8 @@ export default function AddClient() {
         name,
         email,
         password,
-        whitelistedIps
+        whitelistedIps,
+        providersAllowed
       });
 
       toast.success("Client added successfully");
@@ -103,6 +121,37 @@ export default function AddClient() {
                   >
                     <span>{ip}</span>
                     <button type="button" onClick={() => handleRemoveIp(ip)}>
+                      <X className="w-4 h-4 text-red-500 hover:text-red-700" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Providers Allowed */}
+          <div>
+            <Label htmlFor="provider">Allowed Providers (IDs)</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                id="provider"
+                placeholder="Enter provider ID"
+                value={providerInput}
+                onChange={(e) => setProviderInput(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="button" onClick={handleAddProvider}>Add</Button>
+            </div>
+
+            {providersAllowed.length > 0 && (
+              <div className="mt-3 space-y-1">
+                {providersAllowed.map((id, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between px-3 py-1 border rounded text-sm bg-gray-50"
+                  >
+                    <span>{id}</span>
+                    <button type="button" onClick={() => handleRemoveProvider(id)}>
                       <X className="w-4 h-4 text-red-500 hover:text-red-700" />
                     </button>
                   </div>
