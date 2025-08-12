@@ -8,11 +8,7 @@ export const POST = async (req: NextRequest) => {
   
   try {
     const body = await req.json();
-
-    const {
-      timestamp,
-      payload
-    } = body;
+    const { timestamp, payload } = body;
 
     if(!payload) {
       return NextResponse.json(
@@ -48,6 +44,13 @@ export const POST = async (req: NextRequest) => {
       timestamp: gameTimestamp,
     } = decryptedJson;
 
+    const bet = new Prisma.Decimal(bet_amount);
+    const win = new Prisma.Decimal(win_amount);
+    const diff = bet.minus(win);
+
+    const profitValue = diff.gt(0) ? diff : new Prisma.Decimal(0);
+    const lossValue = diff.lt(0) ? diff.abs() : new Prisma.Decimal(0);
+
     const matchingSession = await prisma.gameSession.findFirst({
       where: {
         gameUid: game_uid,
@@ -55,7 +58,13 @@ export const POST = async (req: NextRequest) => {
           memberAccount: member_account
         }
       },
-      select: { id: true }
+      select: { 
+        id: true,
+        providerCode: true,
+        clientMember: {
+          select: { userId: true }
+        }
+      }
     })
 
     if (!matchingSession) {
@@ -71,22 +80,33 @@ export const POST = async (req: NextRequest) => {
         gameRound: game_round,
         betAmount: new Prisma.Decimal(bet_amount),
         winAmount: new Prisma.Decimal(win_amount),
-
-        profit: (() => {
-          const diff = new Prisma.Decimal(bet_amount).minus(new Prisma.Decimal(win_amount));
-          return diff.gt(0) ? diff : new Prisma.Decimal(0);
-        })(),
-        loss: (() => {
-          const diff = new Prisma.Decimal(bet_amount).minus(new Prisma.Decimal(win_amount));
-          return diff.lt(0) ? diff.abs() : new Prisma.Decimal(0);
-        })(),
-
+        profit: profitValue,
+        loss: lossValue,
         memberAccount: member_account,
         currencyCode: currency_code,
         callbackTime: new Date(`${gameTimestamp} UTC`),
         gameSessionId: matchingSession?.id || null
       },
     });
+
+    if(matchingSession?.clientMember?.userId && matchingSession?.providerCode) {
+      await prisma.providerProfit.upsert({
+        where: {
+          providerCode_userId: {
+            providerCode: matchingSession.providerCode,
+            userId: matchingSession.clientMember.userId
+          }
+        },
+        update: {
+          profit: { increment: profitValue }
+        },
+        create: {
+          providerCode: matchingSession.providerCode,
+          userId: matchingSession.clientMember.userId,
+          profit: profitValue
+        }
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

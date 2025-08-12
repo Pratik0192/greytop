@@ -20,7 +20,18 @@ model User {
   whitelistedIps   String[]
   createdAt        DateTime @default(now())
 
-  clientMembers ClientMember[]
+  providerProfits ProviderProfit[]
+  clientMembers   ClientMember[]
+}
+
+model ProviderProfit {
+  id           Int     @id @default(autoincrement())
+  providerCode String
+  profit       Decimal @db.Decimal(18, 2)
+  userId       String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerCode, userId])
 }
 
 model ClientMember {
@@ -47,7 +58,7 @@ model GameSession {
   platform       Int
   callbackUrl    String
   timestamp      BigInt
-  providerCode   String  @default("UNKNOWN_CODE")
+  providerCode   String   @default("UNKNOWN_CODE")
   createdAt      DateTime @default(now())
 
   clientMember ClientMember  @relation(fields: [clientMemberId], references: [id], onDelete: Cascade)
@@ -58,15 +69,15 @@ model GameSession {
 }
 
 model GameHistory {
-  id            Int      @id @default(autoincrement())
-  serialNumber  String   @unique
-  gameUid       String   @default("UNKNOWN_UID")
-  gameRound     String   @default("ROUND_0")
-  betAmount     Decimal  @default(0.00) @db.Decimal(18, 2)
-  winAmount     Decimal  @default(0.00) @db.Decimal(18, 2)
+  id           Int     @id @default(autoincrement())
+  serialNumber String  @unique
+  gameUid      String  @default("UNKNOWN_UID")
+  gameRound    String  @default("ROUND_0")
+  betAmount    Decimal @default(0.00) @db.Decimal(18, 2)
+  winAmount    Decimal @default(0.00) @db.Decimal(18, 2)
 
-  profit        Decimal  @default(0.00) @db.Decimal(18, 2)
-  loss          Decimal  @default(0.00) @db.Decimal(18, 2)
+  profit Decimal @default(0.00) @db.Decimal(18, 2)
+  loss   Decimal @default(0.00) @db.Decimal(18, 2)
 
   memberAccount String
   currencyCode  String

@@ -47,8 +47,7 @@ export default function AdminClients() {
     fetchClients();
   }, []);
 
-  console.log(clients);
-  
+  console.log("clients", clients);
 
   return (
     <div className="p-4 md:mt-12 mt-8 bg-background">

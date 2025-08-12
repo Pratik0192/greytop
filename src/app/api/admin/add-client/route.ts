@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@/generated/prisma";
 
 function generateApiKey(): string {
   return randomBytes(32).toString('hex');
@@ -36,7 +37,16 @@ export const POST = async (req: NextRequest) => {
         whitelistedIps,
         providersAllowed,
         role: 'CLIENT',
-        status: 'active'
+        status: 'active',
+        providerProfits: {
+          create: providersAllowed.map(providerCode => ({
+            providerCode,
+            profit: new Prisma.Decimal(0.00),
+          }))
+        }
+      },
+      include: {
+        providerProfits: true
       }
     })
 
@@ -50,6 +60,7 @@ export const POST = async (req: NextRequest) => {
         role: user.role,
         whitelistedIps: user.whitelistedIps,
         providersAllowed: user.providersAllowed,
+        providerProfits: user.providerProfits
       },
     });
   } catch (error) {
