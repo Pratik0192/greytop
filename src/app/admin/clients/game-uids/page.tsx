@@ -21,6 +21,8 @@ interface GameHistory {
   gameRound: string;
   betAmount: string;
   winAmount: string;
+  profit: string;
+  loss: string;
   callbackTime: string;
   createdAt: string;
   gameSessionId: number;
@@ -106,6 +108,8 @@ function AdminClientsContent() {
                 <TableHead>Game Round</TableHead>
                 <TableHead>Bet Amount</TableHead>
                 <TableHead>Win Amount</TableHead>
+                <TableHead>Profit</TableHead>
+                <TableHead>Loss</TableHead>
                 <TableHead>Game Ending Time</TableHead>
               </TableRow>
             </TableHeader>
@@ -131,6 +135,8 @@ function AdminClientsContent() {
                       <TableCell>{history.gameRound}</TableCell>
                       <TableCell>{history.betAmount}</TableCell>
                       <TableCell>{history.winAmount}</TableCell>
+                      <TableCell>{history.profit}</TableCell>
+                      <TableCell>{history.loss}</TableCell>
                       <TableCell>
                         {new Date(history.callbackTime).toLocaleString()}
                       </TableCell>
