@@ -71,6 +71,16 @@ export const POST = async (req: NextRequest) => {
         gameRound: game_round,
         betAmount: new Prisma.Decimal(bet_amount),
         winAmount: new Prisma.Decimal(win_amount),
+
+        profit: (() => {
+          const diff = new Prisma.Decimal(bet_amount).minus(new Prisma.Decimal(win_amount));
+          return diff.gt(0) ? diff : new Prisma.Decimal(0);
+        })(),
+        loss: (() => {
+          const diff = new Prisma.Decimal(bet_amount).minus(new Prisma.Decimal(win_amount));
+          return diff.lt(0) ? diff.abs() : new Prisma.Decimal(0);
+        })(),
+
         memberAccount: member_account,
         currencyCode: currency_code,
         callbackTime: new Date(`${gameTimestamp} UTC`),

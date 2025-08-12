@@ -64,6 +64,10 @@ model GameHistory {
   gameRound     String   @default("ROUND_0")
   betAmount     Decimal  @default(0.00) @db.Decimal(18, 2)
   winAmount     Decimal  @default(0.00) @db.Decimal(18, 2)
+
+  profit        Decimal  @default(0.00) @db.Decimal(18, 2)
+  loss          Decimal  @default(0.00) @db.Decimal(18, 2)
+
   memberAccount String
   currencyCode  String
   callbackTime  DateTime
