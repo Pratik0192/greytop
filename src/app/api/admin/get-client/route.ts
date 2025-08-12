@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 
-export const POST = async(req: NextRequest) => {
+export const POST = async (req: NextRequest) => {
   try {
     const clients = await prisma.user.findMany({
       where: {

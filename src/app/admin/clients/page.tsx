@@ -15,6 +15,14 @@ import api from "@/lib/axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import ViewProviderProfitsDialog from "@/components/ViewProviderProfitsDialog";
+
+interface ProviderProfit {
+  id: number;
+  providerCode: string;
+  profit: string;
+  userId: string;
+}
 
 interface Client {
   id: string;
@@ -25,6 +33,7 @@ interface Client {
   whitelistedIps: string[];
   providersAllowed: string[];
   createdAt: string;
+  providerProfits: ProviderProfit[];
 }
 
 export default function AdminClients() {
@@ -125,9 +134,7 @@ export default function AdminClients() {
                     {new Date(client.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
-                    {/* <Button size="sm" variant="outline">
-                      Edit
-                    </Button> */}
+                    <ViewProviderProfitsDialog profits={client.providerProfits || []} />
                     <EditClientDialog
                       client={{
                         id: client.id,
