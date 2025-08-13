@@ -34,7 +34,9 @@ export default function ViewProviderProfitsDialog({ profits }: Props) {
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>Provider Code</TableHead>
-                <TableHead>Profit</TableHead>
+                <TableHead>Total Profit</TableHead>
+                <TableHead>Total Loss</TableHead>
+                <TableHead>Bill</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -43,6 +45,8 @@ export default function ViewProviderProfitsDialog({ profits }: Props) {
                   <TableCell>{p.id}</TableCell>
                   <TableCell>{p.providerCode}</TableCell>
                   <TableCell>{p.profit}</TableCell>
+                  <TableCell>{p.loss}</TableCell>
+                  <TableCell>{p.bill}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
