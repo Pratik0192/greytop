@@ -8,6 +8,8 @@ interface ProviderProfit {
   id: number;
   providerCode: string;
   profit: string;
+  loss: string;
+  bill: string;
 }
 
 interface Props {
@@ -24,7 +26,7 @@ export default function ViewProviderProfitsDialog({ profits }: Props) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Provider Profits</DialogTitle>
+          <DialogTitle>Provider wise Profits</DialogTitle>
         </DialogHeader>
         {profits.length > 0 ? (
           <Table>

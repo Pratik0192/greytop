@@ -21,6 +21,8 @@ interface ProviderProfit {
   id: number;
   providerCode: string;
   profit: string;
+  loss: string;
+  bill: string;
   userId: string;
 }
 
@@ -34,6 +36,7 @@ interface Client {
   providersAllowed: string[];
   createdAt: string;
   providerProfits: ProviderProfit[];
+  totalBill: String;
 }
 
 export default function AdminClients() {
@@ -44,7 +47,7 @@ export default function AdminClients() {
   const fetchClients = async () => {
     try {
       const res = await api.post("/api/admin/get-client");
-      setClients(res.data.clients);
+      setClients(res.data.updatedClients);
     } catch (error) {
       toast.error("Failed to load clients");
     } finally {
@@ -78,6 +81,7 @@ export default function AdminClients() {
                 <TableHead>Status</TableHead>
                 <TableHead>Allowed Providers</TableHead>
                 <TableHead>Whitelisted IPs</TableHead>
+                <TableHead>Total Bill</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -129,6 +133,9 @@ export default function AdminClients() {
                   </TableCell>
                   <TableCell className="truncate max-w-[150px]">
                     {client.whitelistedIps.join(", ")}
+                  </TableCell>
+                  <TableCell className="truncate max-w-[150px]">
+                    {client.totalBill}
                   </TableCell>
                   <TableCell>
                     {new Date(client.createdAt).toLocaleDateString()}
