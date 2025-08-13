@@ -43,7 +43,7 @@ export const POST = async (req: NextRequest) => {
               data: { bill }
             });
 
-            return { ...pp, bill };
+            return { ...pp, bill: bill.toString() };
           })
         );
 
@@ -55,7 +55,7 @@ export const POST = async (req: NextRequest) => {
         return {
           ...client,
           providerProfits: updatedProviderProfits,
-          totalBill
+          totalBill: totalBill.toString(),
         };
       })
     );
