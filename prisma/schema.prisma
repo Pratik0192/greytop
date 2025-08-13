@@ -19,8 +19,8 @@ model User {
   providersAllowed String[]
   whitelistedIps   String[]
   createdAt        DateTime @default(now())
-  
-  totalBill        Decimal          @default(0.00) @db.Decimal(18, 2)
+
+  totalBill Decimal @default(0.00) @db.Decimal(18, 2)
 
   providerProfits ProviderProfit[]
   clientMembers   ClientMember[]
@@ -30,6 +30,7 @@ model ProviderProfit {
   id           Int     @id @default(autoincrement())
   providerCode String
   profit       Decimal @db.Decimal(18, 2)
+  loss         Decimal @db.Decimal(18, 2) @default(0.00)
   bill         Decimal @default(0.00) @db.Decimal(18, 2)
   userId       String
   user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)

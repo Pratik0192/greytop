@@ -98,12 +98,14 @@ export const POST = async (req: NextRequest) => {
           }
         },
         update: {
-          profit: { increment: profitValue }
+          profit: { increment: profitValue },
+          loss: { increment: lossValue }
         },
         create: {
           providerCode: matchingSession.providerCode,
           userId: matchingSession.clientMember.userId,
-          profit: profitValue
+          profit: profitValue,
+          loss: lossValue,
         }
       });
     }

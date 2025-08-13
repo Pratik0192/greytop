@@ -34,7 +34,9 @@ export const POST = async (req: NextRequest) => {
             });
 
             const ggrPercent = provider?.ggrPercent ?? 0;
-            const bill = pp.profit.mul(ggrPercent).div(100);
+
+            const profitMinusLoss = pp.profit.sub(pp.loss);
+            const bill = profitMinusLoss.mul(ggrPercent).div(100);
 
             totalBill = totalBill.add(bill);
 
