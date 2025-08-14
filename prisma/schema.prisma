@@ -24,6 +24,32 @@ model User {
 
   providerProfits ProviderProfit[]
   clientMembers   ClientMember[]
+  monthlybill MonthlyBill[]
+}
+
+model MonthlyBill {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  month     Int
+  year      Int
+  totalProfit Decimal @default(0.00) @db.Decimal(18, 2)
+  totalLoss   Decimal @default(0.00) @db.Decimal(18, 2)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providers  MonthlyBillProvider[]
+
+  @@unique([userId, month, year])
+}
+
+model MonthlyBillProvider {
+  id             Int      @id @default(autoincrement())
+  monthlyBillId  Int
+  providerCode   String
+  profit         Decimal @default(0.00) @db.Decimal(18, 2)
+  loss           Decimal @default(0.00) @db.Decimal(18, 2)
+
+  monthlyBill MonthlyBill @relation(fields: [monthlyBillId], references: [id], onDelete: Cascade)
 }
 
 model ProviderProfit {
