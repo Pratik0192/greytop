@@ -91,8 +91,8 @@ export default function Bills() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {bills.map((bill) => (
-            <>
+          {filteredBills.length > 0 ? (
+            filteredBills.map((bill) => (
               <TableRow key={bill.id}>
                 <TableCell>{bill.id}</TableCell>
                 <TableCell>
@@ -109,14 +109,20 @@ export default function Bills() {
                 <TableCell>{bill.totalProfit}</TableCell>
                 <TableCell>{bill.totalLoss}</TableCell>
                 <TableCell>
-                  <BillProvidersDialog 
+                  <BillProvidersDialog
                     providers={bill.providers}
                     count={bill.providers.length}
                   />
                 </TableCell>
               </TableRow>
-            </>
-          ))}
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center text-gray-500">
+                No bills found.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
