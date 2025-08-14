@@ -84,7 +84,7 @@ export default function Bills() {
               {expanded === bill.id && (
                 <TableRow>
                   <TableCell colSpan={6}>
-                    <Table className="bg-gray-50 rounded-md">
+                    <Table className="bg-background text-foreground rounded-md">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Provider Code</TableHead>
