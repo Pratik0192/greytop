@@ -1,5 +1,6 @@
 "use client";
 
+import { Eye } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
@@ -20,9 +21,7 @@ export default function ViewProviderProfitsDialog({ profits }: Props) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          View
-        </Button>
+        <Eye className="h-4 w-4 hover:cursor-pointer " />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

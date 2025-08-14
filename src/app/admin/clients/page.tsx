@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import ViewProviderProfitsDialog from "@/components/ViewProviderProfitsDialog";
+import ViewListDialog from "@/components/ViewListDialog";
 
 interface ProviderProfit {
   id: number;
@@ -74,9 +75,7 @@ export default function AdminClients() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Id</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>Client</TableHead>
                 <TableHead>API Key</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Allowed Providers</TableHead>
@@ -94,11 +93,10 @@ export default function AdminClients() {
                       href={`/admin/clients/members?userId=${client.id}`}
                       className="hover:underline"
                     >
-                      {client.id}
+                      {client.name}
                     </Link>
+                    <div className="text-sm text-muted-foreground">{client.email}</div>
                   </TableCell>
-                  <TableCell>{client.name}</TableCell>
-                  <TableCell>{client.email}</TableCell>
                   <TableCell className="max-w-[150px]">
                     {visibleApiKey === client.id ? (
                       <>
@@ -129,10 +127,10 @@ export default function AdminClients() {
 
                   <TableCell>{client.status}</TableCell>
                   <TableCell className="truncate max-w-[150px]">
-                    {client.providersAllowed.join(", ")}
+                    <ViewListDialog title="Allowed Providers" items={client.providersAllowed} />
                   </TableCell>
                   <TableCell className="truncate max-w-[150px]">
-                    {client.whitelistedIps.join(", ")}
+                    <ViewListDialog title="Whitelisted IPs" items={client.whitelistedIps} />
                   </TableCell>
                   <TableCell className="truncate max-w-[150px]">
                     {client.totalBill}
@@ -140,17 +138,19 @@ export default function AdminClients() {
                   <TableCell>
                     {new Date(client.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <ViewProviderProfitsDialog profits={client.providerProfits || []} />
-                    <EditClientDialog
-                      client={{
-                        id: client.id,
-                        name: client.name,
-                        status: client.status,
-                        whitelistedIps: client.whitelistedIps,
-                      }}
-                      onUpdate={fetchClients}
-                    />
+                  <TableCell className="text-right align-middle">
+                    <div className="flex justify-center items-center gap-3">
+                      <ViewProviderProfitsDialog profits={client.providerProfits || []} />
+                      <EditClientDialog
+                        client={{
+                          id: client.id,
+                          name: client.name,
+                          status: client.status,
+                          whitelistedIps: client.whitelistedIps,
+                        }}
+                        onUpdate={fetchClients}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

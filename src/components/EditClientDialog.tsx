@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { Pencil } from "lucide-react";
 
 interface EditClientDialogProps {
   client: {
@@ -47,7 +48,7 @@ export default function EditClientDialog({ client, onUpdate }: EditClientDialogP
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Edit</Button>
+        <Pencil className="h-4 w-4 hover:cursor-pointer " />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
