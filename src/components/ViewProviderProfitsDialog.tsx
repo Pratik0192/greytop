@@ -4,6 +4,7 @@ import { Eye } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 interface ProviderProfit {
   id: number;
@@ -20,9 +21,18 @@ interface Props {
 export default function ViewProviderProfitsDialog({ profits }: Props) {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Eye className="h-4 w-4 hover:cursor-pointer " />
-      </DialogTrigger>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Eye className="h-4 w-4 hover:cursor-pointer" />
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View provider wise profit and loss</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Provider wise Profits</DialogTitle>
