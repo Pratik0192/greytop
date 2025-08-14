@@ -1,9 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import BillProvidersDialog from "@/components/BillProviderDialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import api from "@/lib/axios"
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Provider {
   id: number;
@@ -24,7 +26,8 @@ interface Bill {
 
 export default function Bills() {
   const [bills, setBills] = useState<Bill[]>([]);
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
 
   useEffect(() => {
     api
@@ -37,9 +40,45 @@ export default function Bills() {
       });
   }, []);
 
+  const filteredBills = useMemo(() => {
+    return bills.filter((bill) => {
+      const matchesSearch = bill.user.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      const matchesMonth =
+        monthFilter === "all" || bill.month.toString() === monthFilter;
+
+      return matchesSearch && matchesMonth;
+    });
+  }, [bills, search, monthFilter]);
+
   return (
     <div className="p-4 mt-20">
       <h1 className="text-xl font-semibold mb-4">Monthly Bills</h1>
+
+      <div className="flex items-center gap-4 mb-4">
+        <Input
+          placeholder="Search by client name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-xs"
+        />
+        <Select value={monthFilter} onValueChange={(val) => setMonthFilter(val)}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Filter by month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Months</SelectItem>
+            {Array.from({ length: 12 }, (_, i) => (
+              <SelectItem key={i + 1} value={(i + 1).toString()}>
+                {new Date(0, i).toLocaleString("default", { month: "long" })}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -70,41 +109,12 @@ export default function Bills() {
                 <TableCell>{bill.totalProfit}</TableCell>
                 <TableCell>{bill.totalLoss}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setExpanded(expanded === bill.id ? null : bill.id)
-                    }
-                  >
-                    {expanded === bill.id ? "Hide" : "View"} ({bill.providers.length})
-                  </Button>
+                  <BillProvidersDialog 
+                    providers={bill.providers}
+                    count={bill.providers.length}
+                  />
                 </TableCell>
               </TableRow>
-              {expanded === bill.id && (
-                <TableRow>
-                  <TableCell colSpan={6}>
-                    <Table className="bg-background text-foreground rounded-md">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Provider Code</TableHead>
-                          <TableHead>Profit</TableHead>
-                          <TableHead>Loss</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {bill.providers.map((p) => (
-                          <TableRow key={p.id}>
-                            <TableCell>{p.providerCode}</TableCell>
-                            <TableCell>{p.profit}</TableCell>
-                            <TableCell>{p.loss}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableCell>
-                </TableRow>
-              )}
             </>
           ))}
         </TableBody>
