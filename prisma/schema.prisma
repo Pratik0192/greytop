@@ -30,7 +30,7 @@ model ProviderProfit {
   id           Int     @id @default(autoincrement())
   providerCode String
   profit       Decimal @db.Decimal(18, 2)
-  loss         Decimal @db.Decimal(18, 2) @default(0.00)
+  loss         Decimal @default(0.00) @db.Decimal(18, 2)
   bill         Decimal @default(0.00) @db.Decimal(18, 2)
   userId       String
   user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
