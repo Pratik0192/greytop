@@ -22,9 +22,9 @@ export default function AdminNavbar() {
               >
                 <Menu size={26} />
               </button>
-              <Link href="/" className="text-2xl font-bold text-foreground">
+              {/* <Link href="/" className="text-2xl font-bold text-foreground">
                 GreyTop
-              </Link>
+              </Link> */}
             </div>
             <div className="flex items-center gap-2">
               <p className="text-foreground">ADMIN</p>
