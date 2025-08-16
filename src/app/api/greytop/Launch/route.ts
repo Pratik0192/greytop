@@ -52,6 +52,25 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
+    const game = await prisma.game.findFirst({
+      where: { gameUid: game_uid },
+      select: { id: true, gameProviderId: true } 
+    })
+
+    if (!game) {
+      return NextResponse.json(
+        { error: `Game with UID ${game_uid} does not exist.` },
+        { status: 404 }
+      );
+    }
+
+    if (game.gameProviderId !== providerCode) {
+      return NextResponse.json(
+        { error: `Game ${game_uid} does not belong to provider ${providerCode}.` },
+        { status: 403 }
+      );
+    }
+
     const fullMemberAccount = `${PLAYER_PREFIX}${member_account}`;
     const timestamp = Date.now().toString();
 

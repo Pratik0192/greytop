@@ -61,6 +61,7 @@ export const POST = async (req: NextRequest) => {
       select: { 
         id: true,
         providerCode: true,
+        callbackUrl: true,
         clientMember: {
           select: { userId: true }
         }
@@ -108,6 +109,24 @@ export const POST = async (req: NextRequest) => {
           loss: lossValue,
         }
       });
+    }
+
+    if(matchingSession?.callbackUrl) {
+      try {
+        await fetch(matchingSession.callbackUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ timestamp, payload }),
+        });
+        console.log(
+          `[CALLBACK] Forwarded to client callback: ${matchingSession.callbackUrl}`
+        );
+      } catch (forwardErr) {
+        console.error(
+          `[CALLBACK] Failed to forward callback to ${matchingSession.callbackUrl}:`,
+          forwardErr
+        );
+      }
     }
 
     return NextResponse.json({ success: true });
