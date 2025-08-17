@@ -6,7 +6,7 @@ async function generateUniqueGameId() {
   let exists = true;
 
   do {
-    id = Math.floor(100 + Math.random() * 900).toString();
+    id = Math.floor(1000 + Math.random() * 9000).toString();
     const existing = await prisma.game.findUnique({ where: { id } });
     exists = !!existing;
   } while (exists);

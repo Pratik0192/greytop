@@ -130,7 +130,7 @@ model GameProvider {
 }
 
 model Game {
-  id             String       @id @db.Char(3)
+  id             String       @id @db.Char(4)
   name           String       @default("Unnamed Game")
   gameUid        String       @default("UNKNOWN_UID")
   types          String       @default("Unknown")
