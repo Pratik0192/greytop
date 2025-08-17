@@ -52,7 +52,7 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json({ success: false, message: "Game Provider ID must be exactly 3 digits" }, { status: 400 });
     }
 
-    const provider = await prisma.gameProvider.findUnique({ 
+    const provider = await prisma.gameProvider.findFirst({ 
       where: { 
         id: gameProviderId
       }
