@@ -135,7 +135,12 @@ export const POST = async (req: NextRequest) => {
       })
     })
 
+    console.log("raw response", upstreamResponse);
+    
     const responseData = await upstreamResponse.json();
+
+    console.log("response data", responseData);
+    
 
     return NextResponse.json({
       status: upstreamResponse.status,
