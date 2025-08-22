@@ -121,6 +121,8 @@ export const POST = async (req: NextRequest) => {
     const payloadString = JSON.stringify(payloadObject);
     const encryptedPayload = encryptAES(payloadString);
 
+    console.log("payload object", payloadObject);
+    
     const upstreamResponse = await fetch(`${SERVER_URL}/game/v1`, {
       method: 'POST',
       headers: {
