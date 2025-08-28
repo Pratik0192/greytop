@@ -18,6 +18,12 @@ import { toast } from "sonner";
 import ViewProviderProfitsDialog from "@/components/ViewProviderProfitsDialog";
 import ViewListDialog from "@/components/ViewListDialog";
 
+interface Provider {
+  id: string;
+  name: string;
+  ggrPercent: number;
+}
+
 interface ProviderProfit {
   id: number;
   providerCode: string;
@@ -42,6 +48,7 @@ interface Client {
 
 export default function AdminClients() {
   const [clients, setClients] = useState<Client[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const [visibleApiKey, setVisibleApiKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -56,11 +63,29 @@ export default function AdminClients() {
     }
   };
 
+  const fetchProviders = async () => {
+    try {
+      const res = await api.post("/api/admin/get-providers");
+      setProviders(res.data.providers);
+    } catch (error) {
+      toast.error("Failed to load providers");
+    }
+  };
+
   useEffect(() => {
-    fetchClients();
+    Promise.all([fetchClients(), fetchProviders()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
-  console.log("clients", clients);
+  // console.log("clients", clients);
+
+  const getProviderDetails = (codes: string[]) => {
+    return codes
+      .map((code) => providers.find((p) => p.id === code))
+      .filter(Boolean)
+      .map((p) => `${p!.id} - ${p!.name} (GGR: ${p!.ggrPercent}%)`);
+  };
 
   return (
     <div className="p-4 md:mt-12 mt-8 bg-background">
@@ -127,7 +152,10 @@ export default function AdminClients() {
 
                   <TableCell>{client.status}</TableCell>
                   <TableCell className="truncate max-w-[150px]">
-                    <ViewListDialog title="Allowed Providers" items={client.providersAllowed} />
+                    <ViewListDialog 
+                      title="Allowed Providers" 
+                      items={getProviderDetails(client.providersAllowed)}
+                    />
                   </TableCell>
                   <TableCell className="truncate max-w-[150px]">
                     <ViewListDialog title="Whitelisted IPs" items={client.whitelistedIps} />
