@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decryptAES } from "@/lib/aes";
+import { decryptAES, encryptAES } from "@/lib/aes";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 
@@ -62,6 +62,7 @@ export const POST = async (req: NextRequest) => {
         id: true,
         providerCode: true,
         callbackUrl: true,
+        creditAmount: true,
         clientMember: {
           select: { userId: true }
         }
@@ -129,7 +130,28 @@ export const POST = async (req: NextRequest) => {
       }
     }
 
-    return NextResponse.json({ success: true });
+    let currentBalance = new Prisma.Decimal(matchingSession?.creditAmount || "0");
+
+    const updatedBalance = currentBalance.minus(bet).plus(win)
+
+    if(matchingSession?.id) {
+      await prisma.gameSession.update({
+        where: { id: matchingSession.id },
+        data: { creditAmount: updatedBalance.toString() }
+      })
+    }
+
+    const responsePayload = {
+      credit_amount: updatedBalance.toString(),
+      timestamp: Date.now().toString(),
+    }
+    const encryptedPayload = encryptAES(JSON.stringify(responsePayload));
+
+    return NextResponse.json({ 
+      code: 0,
+      msg: "",
+      payload: encryptedPayload,
+    });
   } catch (error) {
     console.error("[CALLBACK] Error:", error);
     return NextResponse.json(
