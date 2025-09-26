@@ -30,19 +30,23 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json({ message: "No data found for this month" });
     }
 
-    const providerMap: Record<string, { profit: number; loss: number }> = {};
+    const providerMap: Record<string, { profit: number; loss: number; totalBet: number; totalWin: number }> = {};
 
     for(const h of histories) {
       const providerCode = h.gameSession?.providerCode || "UNKNOWN";
       if(!providerMap[providerCode]) {
-        providerMap[providerCode] = { profit: 0, loss: 0 };
+        providerMap[providerCode] = { profit: 0, loss: 0, totalBet: 0, totalWin: 0 };
       }
       providerMap[providerCode].profit += Number(h.profit);
       providerMap[providerCode].loss += Number(h.loss);
+      providerMap[providerCode].totalBet += Number(h.betAmount);
+      providerMap[providerCode].totalWin += Number(h.winAmount);
     }
 
     const totalProfit = Object.values(providerMap).reduce((sum, p) => sum + p.profit, 0);
     const totalLoss = Object.values(providerMap).reduce((sum, p) => sum + p.loss, 0);
+    const totalBet = Object.values(providerMap).reduce((sum, p) => sum + p.totalBet, 0);
+    const totalWin = Object.values(providerMap).reduce((sum, p) => sum + p.totalWin, 0);
 
     const bill = await prisma.monthlyBill.upsert({
       where: {
@@ -55,12 +59,16 @@ export const POST = async (req: NextRequest) => {
       update: {
         totalProfit,
         totalLoss,
+        totalBet,
+        totalWin,
         providers: {
           deleteMany: {},
-          create: Object.entries(providerMap).map(([providerCode, { profit, loss }]) => ({
+          create: Object.entries(providerMap).map(([providerCode, { profit, loss, totalBet, totalWin }]) => ({
             providerCode,
             profit,
-            loss
+            loss,
+            totalBet,
+            totalWin
           }))
         }
       },
@@ -70,11 +78,15 @@ export const POST = async (req: NextRequest) => {
         year,
         totalProfit,
         totalLoss,
+        totalBet,
+        totalWin,
         providers: {
-          create: Object.entries(providerMap).map(([providerCode, { profit, loss }]) => ({
+          create: Object.entries(providerMap).map(([providerCode, { profit, loss, totalBet, totalWin }]) => ({
             providerCode,
             profit,
             loss,
+            totalBet,
+            totalWin
           })),
         },
       },

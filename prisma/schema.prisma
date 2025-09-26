@@ -34,6 +34,8 @@ model MonthlyBill {
   year      Int
   totalProfit Decimal @default(0.00) @db.Decimal(18, 2)
   totalLoss   Decimal @default(0.00) @db.Decimal(18, 2)
+  totalBet    Decimal? @default(0.00) @db.Decimal(18, 2)
+  totalWin    Decimal? @default(0.00) @db.Decimal(18, 2) 
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -48,6 +50,8 @@ model MonthlyBillProvider {
   providerCode   String
   profit         Decimal @default(0.00) @db.Decimal(18, 2)
   loss           Decimal @default(0.00) @db.Decimal(18, 2)
+  totalBet      Decimal?  @default(0.00) @db.Decimal(18, 2)
+  totalWin      Decimal?  @default(0.00) @db.Decimal(18, 2)
 
   monthlyBill MonthlyBill @relation(fields: [monthlyBillId], references: [id], onDelete: Cascade)
 }

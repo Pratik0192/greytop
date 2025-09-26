@@ -12,6 +12,8 @@ interface Provider {
   providerCode: string;
   profit: string;
   loss: string;
+  totalBet?: string;
+  totalWin?: string;
 }
 
 interface Bill {
@@ -20,6 +22,8 @@ interface Bill {
   year: number;
   totalProfit: string;
   totalLoss: string;
+  totalBet?: string;
+  totalWin?: string;
   user: { name: string; email: string };
   providers: Provider[];
 }
@@ -42,13 +46,8 @@ export default function Bills() {
 
   const filteredBills = useMemo(() => {
     return bills.filter((bill) => {
-      const matchesSearch = bill.user.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-      const matchesMonth =
-        monthFilter === "all" || bill.month.toString() === monthFilter;
-
+      const matchesSearch = bill.user.name.toLowerCase().includes(search.toLowerCase());
+      const matchesMonth = monthFilter === "all" || bill.month.toString() === monthFilter;
       return matchesSearch && matchesMonth;
     });
   }, [bills, search, monthFilter]);
@@ -87,6 +86,8 @@ export default function Bills() {
             <TableHead>Month/Year</TableHead>
             <TableHead>Total Profit</TableHead>
             <TableHead>Total Loss</TableHead>
+            <TableHead>Total Bet</TableHead>
+            <TableHead>Total Win</TableHead>
             <TableHead>Providers</TableHead>
           </TableRow>
         </TableHeader>
@@ -108,6 +109,8 @@ export default function Bills() {
                 </TableCell>
                 <TableCell>{bill.totalProfit}</TableCell>
                 <TableCell>{bill.totalLoss}</TableCell>
+                <TableCell>{bill.totalBet ?? 0}</TableCell>
+                <TableCell>{bill.totalWin ?? 0}</TableCell>
                 <TableCell>
                   <BillProvidersDialog
                     providers={bill.providers}

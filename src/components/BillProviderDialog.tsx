@@ -8,6 +8,8 @@ interface Provider {
   providerCode: string;
   profit: string;
   loss: string;
+  totalBet?: string;
+  totalWin?: string;
 }
 
 export default function BillProvidersDialog({
@@ -34,6 +36,8 @@ export default function BillProvidersDialog({
               <TableHead>Provider Code</TableHead>
               <TableHead>Profit</TableHead>
               <TableHead>Loss</TableHead>
+              <TableHead>Total Bet</TableHead>
+              <TableHead>Total Win</TableHead> 
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -42,6 +46,8 @@ export default function BillProvidersDialog({
                 <TableCell>{p.providerCode}</TableCell>
                 <TableCell>{p.profit}</TableCell>
                 <TableCell>{p.loss}</TableCell>
+                <TableCell>{p.totalBet ?? 0}</TableCell>
+                <TableCell>{p.totalWin ?? 0}</TableCell>
               </TableRow>
             ))}
           </TableBody>
