@@ -61,8 +61,28 @@ export const POST = async (req: NextRequest) => {
       }
     });
 
-    const currentBalance = new Prisma.Decimal(session?.creditAmount || "0");
-    const updatedBalance = currentBalance.minus(bet).plus(win);
+    var updatedBalance = 0;
+    var responseCode = 1;
+
+    if (session?.callbackUrl) {
+      try {
+        var response = await fetch(session.callbackUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ timestamp, payload }),
+        });
+
+        var clientData = await response.json();
+        updatedBalance = clientData.balance;
+        responseCode = clientData.code;
+      } catch (forwardErr) {
+        console.error(
+          `[CALLBACK] Failed to forward callback to ${session.callbackUrl}:`,
+          forwardErr
+        );
+      }
+    }
+
 
     //-------------------------SEND RESPONSE FIRST------------------------------//
     const responsePayload = {
@@ -73,7 +93,7 @@ export const POST = async (req: NextRequest) => {
     const encryptedPayload = encryptAES(JSON.stringify(responsePayload));
 
     const fastResponse = NextResponse.json({
-      code: 0,
+      code: responseCode,
       msg: "",
       payload: encryptedPayload,
     });
@@ -135,21 +155,6 @@ export const POST = async (req: NextRequest) => {
           })
         }
 
-        //Forward request to the client
-        if (session?.callbackUrl) {
-          try {
-            await fetch(session.callbackUrl, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ timestamp, payload }),
-            });
-          } catch (forwardErr) {
-            console.error(
-              `[CALLBACK] Failed to forward callback to ${session.callbackUrl}:`,
-              forwardErr
-            );
-          }
-        }
       } catch (backgroundErr) {
         console.error("Background callback error:", backgroundErr);
       }

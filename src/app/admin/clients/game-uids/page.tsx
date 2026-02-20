@@ -84,7 +84,6 @@ function AdminClientsContent() {
     fetchGameUids();
   }, [clientMemberId]);
 
-  console.log(games);
 
   return (
     <div className="p-4 md:mt-12 mt-8 bg-background">

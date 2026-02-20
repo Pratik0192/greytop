@@ -7,19 +7,19 @@ import { prisma } from '@/lib/prisma';
 
 const SERVER_URL = process.env.SERVER_URL!;
 const AGENCY_UID = process.env.AGENCY_UID!;
-const PLAYER_PREFIX = process.env.PLAYER_PREFIX!; 
-const CALLBACK_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/greytop/callback`
+const PLAYER_PREFIX = process.env.PLAYER_PREFIX!;
+const CALLBACK_URL = "https://greytop.co/api/greytop/callback";
 
 export const POST = async (req: NextRequest) => {
 
   const auth = await verifyClient(req);
-  if(!auth.success) {
+  if (!auth.success) {
     return NextResponse.json({ error: auth.message }, { status: auth.status });
   }
 
   const client = auth.client;
   try {
-    const { 
+    const {
       member_account,
       game_uid,
       credit_amount,
@@ -45,7 +45,7 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    if(!client.providersAllowed.includes(providerCode)) {
+    if (!client.providersAllowed.includes(providerCode)) {
       return NextResponse.json(
         { error: `Provider ${providerCode} is not allowed for this client.` },
         { status: 403 }
@@ -54,7 +54,7 @@ export const POST = async (req: NextRequest) => {
 
     const game = await prisma.game.findFirst({
       where: { gameUid: game_uid },
-      select: { id: true, gameProviderId: true } 
+      select: { id: true, gameProviderId: true }
     })
 
     if (!game) {
@@ -121,8 +121,6 @@ export const POST = async (req: NextRequest) => {
     const payloadString = JSON.stringify(payloadObject);
     const encryptedPayload = encryptAES(payloadString);
 
-    console.log("payload object", payloadObject);
-    
     const upstreamResponse = await fetch(`${SERVER_URL}/game/v1`, {
       method: 'POST',
       headers: {
@@ -135,12 +133,7 @@ export const POST = async (req: NextRequest) => {
       })
     })
 
-    console.log("raw response", upstreamResponse);
-    
     const responseData = await upstreamResponse.json();
-
-    console.log("response data", responseData);
-    
 
     return NextResponse.json({
       status: upstreamResponse.status,

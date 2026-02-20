@@ -78,7 +78,6 @@ export default function AdminClients() {
     );
   }, []);
 
-  // console.log("clients", clients);
 
   const getProviderDetails = (codes: string[]) => {
     return codes
@@ -152,8 +151,8 @@ export default function AdminClients() {
 
                   <TableCell>{client.status}</TableCell>
                   <TableCell className="truncate max-w-[150px]">
-                    <ViewListDialog 
-                      title="Allowed Providers" 
+                    <ViewListDialog
+                      title="Allowed Providers"
                       items={getProviderDetails(client.providersAllowed)}
                     />
                   </TableCell>
