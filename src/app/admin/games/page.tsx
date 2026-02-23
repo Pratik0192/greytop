@@ -4,7 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import api from "@/lib/axios";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +23,7 @@ export default function Games() {
   const [gameUid, setGameUid] = useState("");
   const [gameProviderId, setGameProviderId] = useState("");
   const [providers, setProviders] = useState<any[]>([]);
+  const [searchGameName, setSearchGameName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [fetchedGames, setFetchedGames] = useState<any[]>([]);
@@ -77,7 +86,15 @@ export default function Games() {
     }
     setFetching(true);
     try {
-      const res = await api.post("/api/admin/get-games", { gameProviderId });
+      const params = new URLSearchParams({
+        gameProviderId,
+      });
+
+      if (searchGameName.trim()) {
+        params.append("name", searchGameName.trim());
+      }
+
+      const res = await api.get(`/api/admin/get-games?${params.toString()}`);
       if (res.data.success) {
         setFetchedGames(res.data.games);
       } else {
@@ -153,10 +170,17 @@ export default function Games() {
           <div className="mt-8">
             <div className="flex gap-4">
               <Input
-                placeholder="Enter Game Provider ID"
+                placeholder="Provider ID (e.g. 334)"
                 value={gameProviderId}
                 onChange={(e) => setGameProviderId(e.target.value)}
               />
+
+              <Input
+                placeholder="Search game name (optional)"
+                value={searchGameName}
+                onChange={(e) => setSearchGameName(e.target.value)}
+              />
+
               <Button onClick={handleFetchGames} disabled={fetching}>
                 {fetching ? "Fetching..." : "Fetch Games"}
               </Button>

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const POST = async (req: NextRequest) => {
+export const GET = async (req: NextRequest) => {
   try {
-    const body = await req.json();
-    const { gameProviderId } = body;
+    const { searchParams } = new URL(req.url);
+    const gameProviderId = searchParams.get("gameProviderId");
+    const name = searchParams.get("name");
 
-    if (!gameProviderId || typeof gameProviderId !== "string" || gameProviderId.length !== 3) {
+    if (!gameProviderId || gameProviderId.length !== 3) {
       return NextResponse.json(
         { success: false, message: "Invalid or missing Game Provider ID" },
         { status: 400 }
@@ -25,7 +26,15 @@ export const POST = async (req: NextRequest) => {
     }
 
     const games = await prisma.game.findMany({
-      where: { gameProviderId },
+      where: {
+        gameProviderId,
+        ...(name && {
+          name: {
+            contains: name,
+            mode: "insensitive",
+          },
+        }),
+      },
     });
 
     return NextResponse.json({
