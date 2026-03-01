@@ -3,7 +3,13 @@
 import api from "@/lib/axios";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -15,26 +21,35 @@ interface EditClientDialogProps {
     name: string;
     status: string;
     whitelistedIps: string[];
+    limit?: string | null;
   };
   onUpdate: () => void;
 }
 
-export default function EditClientDialog({ client, onUpdate }: EditClientDialogProps) {
+export default function EditClientDialog({
+  client,
+  onUpdate,
+}: EditClientDialogProps) {
   const [name, setName] = useState(client.name);
   const [status, setStatus] = useState(client.status);
+  const [limit, setLimit] = useState(client.limit ?? "");
   const [ips, setIps] = useState(client.whitelistedIps.join(", ")); // comma separated for now
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSave = async() => {
+  const handleSave = async () => {
     setLoading(true);
     try {
       await api.post("/api/admin/update-client", {
         clientId: client.id,
         name,
         status,
-        whitelistedIps: ips.split(",").map((ip) => ip.trim()).filter((ip) => ip),
-      })
+        whitelistedIps: ips
+          .split(",")
+          .map((ip) => ip.trim())
+          .filter(Boolean),
+        limit: limit === "" ? null : limit,
+      });
       toast.success("Client updated");
       onUpdate();
       setOpen(false);
@@ -43,7 +58,7 @@ export default function EditClientDialog({ client, onUpdate }: EditClientDialogP
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -71,6 +86,15 @@ export default function EditClientDialog({ client, onUpdate }: EditClientDialogP
             </select>
           </div>
           <div>
+            <Label>Monthly Limit</Label>
+            <Input
+              type="number"
+              placeholder="Leave empty for unlimited"
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+            />
+          </div>
+          <div>
             <Label>Whitelisted IPs</Label>
             <Input
               value={ips}
@@ -84,5 +108,5 @@ export default function EditClientDialog({ client, onUpdate }: EditClientDialogP
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

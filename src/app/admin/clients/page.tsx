@@ -181,6 +181,7 @@ export default function AdminClients() {
                           name: client.name,
                           status: client.status,
                           whitelistedIps: client.whitelistedIps,
+                          limit: client.limit,
                         }}
                         onUpdate={fetchClients}
                       />
