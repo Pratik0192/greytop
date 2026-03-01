@@ -19,6 +19,7 @@ export const POST = async (req: NextRequest) => {
         providersAllowed: true,
         createdAt: true,
         totalBill: true,
+        limit: true,
         providerProfits: true
       }
     })

@@ -44,6 +44,7 @@ interface Client {
   createdAt: string;
   providerProfits: ProviderProfit[];
   totalBill: string;
+  limit?: string | null;
 }
 
 export default function AdminClients() {
@@ -105,6 +106,7 @@ export default function AdminClients() {
                 <TableHead>Allowed Providers</TableHead>
                 <TableHead>Whitelisted IPs</TableHead>
                 <TableHead>Total Bill</TableHead>
+                <TableHead>Limit</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -161,6 +163,11 @@ export default function AdminClients() {
                   </TableCell>
                   <TableCell className="truncate max-w-[150px]">
                     ₹ {Number(client.totalBill).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    {client.limit
+                      ? `₹ ${Number(client.limit).toFixed(2)}`
+                      : "Unlimited"}
                   </TableCell>
                   <TableCell>
                     {new Date(client.createdAt).toLocaleDateString()}
