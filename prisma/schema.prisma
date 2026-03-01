@@ -22,6 +22,8 @@ model User {
 
   totalBill Decimal @default(0.00) @db.Decimal(18, 2)
 
+  limit     Decimal? @db.Decimal(18, 2)
+
   providerProfits ProviderProfit[]
   clientMembers   ClientMember[]
   monthlybill MonthlyBill[]

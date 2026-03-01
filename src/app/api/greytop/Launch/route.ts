@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { encryptAES } from '@/lib/aes';
 import { verifyClient } from '@/lib/verifyClient';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from "@/generated/prisma";
 
 const SERVER_URL = process.env.SERVER_URL!;
 const AGENCY_UID = process.env.AGENCY_UID!;
@@ -18,6 +19,26 @@ export const POST = async (req: NextRequest) => {
   }
 
   const client = auth.client;
+
+  if(client.status === "inactive") {
+    return NextResponse.json(
+      { error: "Your account is inactive. Please contact Greytop." },
+      { status: 403 }
+    );
+  }
+
+  if(client.limit !== null) {
+    const totalBill = new Prisma.Decimal(client.totalBill);
+    const limit = new Prisma.Decimal(client.limit);
+
+    if(totalBill.greaterThanOrEqualTo(limit)) {
+      return NextResponse.json(
+        { error: "Your billing limit has been reached. Please contact Greytop." },
+        { status: 403 }
+      );
+    }
+  }
+
   try {
     const {
       member_account,
