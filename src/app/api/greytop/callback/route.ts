@@ -56,7 +56,14 @@ export const POST = async (req: NextRequest) => {
         callbackUrl: true,
         creditAmount: true,
         clientMember: {
-          select: { userId: true }
+          select: { 
+            userId: true,
+            user: {
+              select: {
+                id: true
+              }
+            }
+          }
         }
       }
     });
@@ -127,6 +134,16 @@ export const POST = async (req: NextRequest) => {
 
         //Update the provider profit
         if (session?.clientMember?.userId && session?.providerCode) {
+          const provider = await prisma.gameProvider.findUnique({
+            where: { id: session.providerCode },
+            select: { ggrPercent: true }
+          })
+
+          const ggrPercent = provider?.ggrPercent ?? 0;
+
+          const profitMinusLoss = profitValue.minus(lossValue);
+          const billDelta = profitMinusLoss.mul(ggrPercent).div(100);
+
           await prisma.providerProfit.upsert({
             where: {
               providerCode_userId: {
@@ -136,15 +153,24 @@ export const POST = async (req: NextRequest) => {
             },
             update: {
               profit: { increment: profitValue },
-              loss: { increment: lossValue }
+              loss: { increment: lossValue },
+              bill: { increment: billDelta }
             },
             create: {
               providerCode: session.providerCode,
               userId: session.clientMember.userId,
               profit: profitValue,
               loss: lossValue,
+              bill: billDelta
             }
           });
+
+          await prisma.user.update({
+            where: { id: session.clientMember.userId },
+            data: { 
+              totalBill: { increment: billDelta }
+            }
+          })
         }
 
         //Update the session balance

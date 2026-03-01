@@ -18,51 +18,12 @@ export const POST = async (req: NextRequest) => {
         whitelistedIps: true,
         providersAllowed: true,
         createdAt: true,
+        totalBill: true,
         providerProfits: true
       }
     })
 
-    const updatedClients = await Promise.all(
-      clients.map(async (client) => {
-        let totalBill = new Prisma.Decimal(0);
-
-        const updatedProviderProfits = await Promise.all(
-          client.providerProfits.map(async (pp) => {
-            const provider = await prisma.gameProvider.findUnique({
-              where: { id: pp.providerCode },
-              select: { ggrPercent: true }
-            });
-
-            const ggrPercent = provider?.ggrPercent ?? 0;
-
-            const profitMinusLoss = pp.profit.sub(pp.loss);
-            const bill = profitMinusLoss.mul(ggrPercent).div(100);
-
-            totalBill = totalBill.add(bill);
-
-            await prisma.providerProfit.update({
-              where: { id: pp.id },
-              data: { bill }
-            });
-
-            return { ...pp, bill: bill.toString() };
-          })
-        );
-
-        await prisma.user.update({
-          where: { id: client.id },
-          data: { totalBill }
-        })
-
-        return {
-          ...client,
-          providerProfits: updatedProviderProfits,
-          totalBill: totalBill.toString(),
-        };
-      })
-    );
-
-    return NextResponse.json({ success: true, updatedClients })
+    return NextResponse.json({ success: true, clients })
   } catch (error) {
     console.error("[Get Clients Error]", error);
     return NextResponse.json(

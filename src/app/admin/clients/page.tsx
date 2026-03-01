@@ -43,7 +43,7 @@ interface Client {
   providersAllowed: string[];
   createdAt: string;
   providerProfits: ProviderProfit[];
-  totalBill: String;
+  totalBill: string;
 }
 
 export default function AdminClients() {
@@ -55,7 +55,7 @@ export default function AdminClients() {
   const fetchClients = async () => {
     try {
       const res = await api.post("/api/admin/get-client");
-      setClients(res.data.updatedClients);
+      setClients(res.data.clients);
     } catch (error) {
       toast.error("Failed to load clients");
     } finally {
@@ -160,7 +160,7 @@ export default function AdminClients() {
                     <ViewListDialog title="Whitelisted IPs" items={client.whitelistedIps} />
                   </TableCell>
                   <TableCell className="truncate max-w-[150px]">
-                    {client.totalBill}
+                    ₹ {Number(client.totalBill).toFixed(2)}
                   </TableCell>
                   <TableCell>
                     {new Date(client.createdAt).toLocaleDateString()}
