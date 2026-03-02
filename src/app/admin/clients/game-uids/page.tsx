@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -13,7 +14,6 @@ import api from "@/lib/axios";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
-
 
 interface GameHistory {
   id: number;
@@ -53,6 +53,12 @@ function AdminClientsContent() {
 
   const [games, setGames] = useState<Games[]>([]);
   const [memberName, setMemberName] = useState("");
+
+  const [search, setSearch] = useState("");
+  const [date, setDate] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,11 +66,6 @@ function AdminClientsContent() {
 
     const fetchGameUids = async () => {
       try {
-        const gamesRes = await api.post("/api/admin/user/get-game-uids", {
-          clientMemberId,
-        });
-        setGames(gamesRes.data.gameSessions || []);
-
         const memberRes = await api.post("/api/admin/user/get-member-by-id", {
           clientMemberId,
         });
@@ -84,12 +85,63 @@ function AdminClientsContent() {
     fetchGameUids();
   }, [clientMemberId]);
 
+  const fetchGameUidsDetails = async () => {
+    if (!clientMemberId) return;
+
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        clientMemberId,
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      if (search) params.append("search", search);
+      if (date) params.append("date", date);
+
+      const res = await api.get(`/api/admin/user/get-game-uids?${params}`);
+
+      setGames(res.data.gameSessions || []);
+      setTotalPages(res.data.pagination.totalPages || 1);
+    } catch (error) {
+      toast.error("Failed to load game uids");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGameUidsDetails();
+  }, [clientMemberId, search, date, page]);
 
   return (
     <div className="p-4 md:mt-12 mt-8 bg-background">
       <h1 className="text-2xl font-semibold mb-6 text-foreground">
         {loading ? "Loading..." : `Games for Member: ${memberName}`}
       </h1>
+
+      <div className="flex w-full justify-between mb-4">
+        <input
+          type="text"
+          placeholder="Search Game UID / Serial No"
+          className="border px-3 py-2 rounded w-1/3 outline-none focus:border-yellow-500"
+          value={search}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
+        />
+
+        <input
+          type="date"
+          className="border px-3 py-2 rounded w-1/3 outline-none focus:border-yellow-500"
+          value={date}
+          onChange={(e) => {
+            setPage(1);
+            setDate(e.target.value);
+          }}
+        />
+      </div>
 
       <Card className="p-4 text-foreground">
         {loading ? (
@@ -152,12 +204,29 @@ function AdminClientsContent() {
                       Game not Ended.
                     </TableCell>
                   </TableRow>
-                )
+                ),
               )}
             </TableBody>
           </Table>
         )}
       </Card>
+
+      <div className="flex justify-between items-center mt-4">
+        <Button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+          Previous
+        </Button>
+
+        <span>
+          Page {page} of {totalPages}
+        </span>
+
+        <Button
+          disabled={page === totalPages}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
