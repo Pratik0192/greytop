@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma";
 
-export const POST = async(req: NextRequest) => {
+export const GET = async(req: NextRequest) => {
   try {
-    const body = await req.json();
-    const { userId } = body;
+    const { searchParams } = new URL(req.url);
+
+    const userId = searchParams.get("userId");
+    const search = searchParams.get("search");
+    const date = searchParams.get("date");
+    const page = Number(searchParams.get("page") || 1);
+    const limit = Number(searchParams.get("limit") || 10);
 
     if (!userId) {
       return NextResponse.json(
@@ -13,16 +19,52 @@ export const POST = async(req: NextRequest) => {
       );
     }
 
-    const members = await prisma.clientMember.findMany({
-      where: {
-        userId,
-      },
-      orderBy: {
-        createdAt: "desc",
+    const skip = (page - 1) * limit;
+
+    // Date filter (entire day)
+    let dateFilter = {};
+    if (date) {
+      const start = new Date(`${date}T00:00:00.000Z`);
+      const end = new Date(`${date}T23:59:59.999Z`);
+      dateFilter = {
+        createdAt: {
+          gte: start,
+          lte: end,
+        },
+      };
+    }
+
+    const where = {
+      userId,
+      ...(search && {
+        memberAccount: {
+          contains: search,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      }),
+      ...dateFilter,
+    };
+
+    const [members, total] = await Promise.all([
+      prisma.clientMember.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.clientMember.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      members,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-
-    return NextResponse.json({ members });
   } catch (error) {
     console.error("Error fetching client members:", error);
     return NextResponse.json(
