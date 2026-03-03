@@ -4,7 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import api from "@/lib/axios";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -16,19 +23,35 @@ interface Provider {
   createdAt: string;
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export default function Providers() {
   const [name, setName] = useState("");
   const [ggrPercent, setGgrPercent] = useState("");
   const [loading, setLoading] = useState(false);
+
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+
   const [loadingProviders, setLoadingProviders] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 5;
 
   const fetchProviders = async () => {
     setLoadingProviders(true);
     try {
-      const res = await api.post("/api/admin/get-providers");
+      const res = await api.get(
+        `/api/admin/get-providers?search=${search}&page=${page}&limit=${limit}`,
+      );
       if (res.data.success) {
         setProviders(res.data.providers);
+        setPagination(res.data.pagination);
       } else {
         toast.error(res.data.message || "Failed to fetch providers");
       }
@@ -41,7 +64,7 @@ export default function Providers() {
 
   useEffect(() => {
     fetchProviders();
-  }, []);
+  }, [search, page]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +105,10 @@ export default function Providers() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
+          >
             <div>
               <Label htmlFor="name">Provider Name</Label>
               <Input
@@ -105,7 +131,11 @@ export default function Providers() {
               />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full md:w-auto">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full md:w-auto"
+            >
               {loading ? "Adding..." : "Add Provider"}
             </Button>
           </form>
@@ -115,39 +145,76 @@ export default function Providers() {
       {/* Providers Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Existing Providers</CardTitle>
+          <CardTitle className="text-lg font-semibold">
+            Existing Providers
+          </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Input
+              placeholder="Search by provider name..."
+              value={search}
+              onChange={(e) => {
+                setPage(1);
+                setSearch(e.target.value);
+              }}
+            />
+          </div>
+
           {loadingProviders ? (
             <p>Loading providers...</p>
           ) : providers.length === 0 ? (
             <p>No providers found.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>GGR %</TableHead>
-                  <TableHead>Created At</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {providers.map((provider) => (
-                  <TableRow key={provider.id}>
-                    <TableCell>{provider.id}</TableCell>
-                    <TableCell>{provider.name}</TableCell>
-                    <TableCell>{provider.ggrPercent}</TableCell>
-                    <TableCell>
-                      {new Date(provider.createdAt).toLocaleString()}
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>GGR %</TableHead>
+                    <TableHead>Created At</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {providers.map((provider) => (
+                    <TableRow key={provider.id}>
+                      <TableCell>{provider.id}</TableCell>
+                      <TableCell>{provider.name}</TableCell>
+                      <TableCell>{provider.ggrPercent}</TableCell>
+                      <TableCell>
+                        {new Date(provider.createdAt).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {/* Pagination */}
+              {pagination && (
+                <div className="flex justify-between items-center mt-4">
+                  <Button
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+
+                  <span>
+                    Page {pagination.page} of {pagination.totalPages}
+                  </span>
+
+                  <Button
+                    disabled={page === pagination.totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
