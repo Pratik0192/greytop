@@ -33,7 +33,7 @@ export default function Games() {
   useEffect(() => {
     const fetchProviders = async () => {
       try {
-        const res = await api.post("/api/admin/get-providers");
+        const res = await api.get("/api/admin/get-providers");
         if (res.data.success) {
           setProviders(res.data.providers);
         } else {

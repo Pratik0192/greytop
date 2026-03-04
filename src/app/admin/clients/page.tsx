@@ -66,7 +66,7 @@ export default function AdminClients() {
 
   const fetchProviders = async () => {
     try {
-      const res = await api.post("/api/admin/get-providers");
+      const res = await api.get("/api/admin/get-providers?page=1&limit=1000");
       setProviders(res.data.providers);
     } catch (error) {
       toast.error("Failed to load providers");
